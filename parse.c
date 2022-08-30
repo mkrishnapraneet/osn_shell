@@ -11,12 +11,12 @@ void execute_command(char* command)
 {
     char args[100][50];
     char* token;
-    token = strtok(command, " \n");
+    token = strtok(command, " \t\n");
     int i = 0;
     while (token != NULL)
     {
         strcpy(args[i], token);
-        token = strtok(NULL, " \n");
+        token = strtok(NULL, " \t\n");
         i++;
     }
     strcpy(args[i], "\0");
