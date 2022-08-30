@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <errno.h>
 // #include <parse.c>
 
 
@@ -15,7 +16,7 @@
 #define WHT   "\x1B[1;37m"
 #define RESET "\x1B[1;0m"
 
-void parse(char* str, char commands[500][500], char background[500][500]);
+void parse(char* str, char commands[500][500], char background[500][500], char init_dir[500]);
 
 
 void mainloop()
@@ -30,6 +31,11 @@ void mainloop()
     char* replace;
 
     getcwd(init_dir, sizeof(init_dir));
+    if (init_dir == NULL)
+    {
+        perror("getcwd() error : ");
+        return;
+    }
 
     // get username from system using getpwuid()
     while (1)
@@ -42,14 +48,26 @@ void mainloop()
 
         // get hostname from system using gethostname()
         gethostname(hostname, sizeof(hostname));
+        if (hostname == NULL)
+        {
+            perror("gethostname");
+            exit(1);
+        }
 
         // get current working directory using getcwd()
         getcwd(cwd, sizeof(cwd));
+        if (cwd == NULL)
+        {
+            perror("getcwd");
+            exit(1);
+        }
         strcpy(print_cwd, cwd);
         replace = strstr(print_cwd, init_dir);
         if (replace != NULL)
-        {   
-            strcpy(replace, "~\0");
+        {   char* temp = replace;
+            temp = temp + strlen(init_dir);
+            strcpy(print_cwd, "~");
+            strcat(print_cwd, temp);
         }
         // if (strcmp(cwd, init_dir) == 0)
             // strcpy(cwd, "~");
@@ -59,7 +77,7 @@ void mainloop()
         char* input;
         size_t size = 0;
         getline(&input, &size, stdin);
-        parse(input, commands, background);
+        parse(input, commands, background, init_dir);
         
         printf("\n");
 
