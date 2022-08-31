@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <errno.h>
 
-void cd(char args[100][50], char init_dir[500]);
+void cd(char args[100][50], char init_dir[500], char old_wd[500]);
 void echo(char args[100][50]);
 void pwd();
 
-void execute_command(char *command, char init_dir[500])
+int execute_command(char *command, char init_dir[500], char old_wd[500])
 {
     char args[100][50];
     char *token;
@@ -31,23 +31,27 @@ void execute_command(char *command, char init_dir[500])
     {
         // printf("yes\n");
         pwd();
+        return 1;
     }
     else if (strcmp(args[0], "echo") == 0)
     {
         echo(args);
+        return 2;
     }
     else if (strcmp(args[0], "cd") == 0)
     {
-        cd(args, init_dir);
+        cd(args, init_dir, old_wd);
+        return 3;
     }
     else
     {
         printf("Error : Command not found\n");
+        return 0;
     }
     // execvp(args[0], args[100][50]);
 }
 
-void parse(char *str, char commands[500][500], char background[500][500], char init_dir[500])
+int parse(char *str, char commands[500][500], char background[500][500], char init_dir[500], char old_wd[500])
 {
     char *token;
     token = strtok(str, ";");
@@ -71,10 +75,16 @@ void parse(char *str, char commands[500][500], char background[500][500], char i
         i++;
     }
     commands[i][0] = '\0';
-
+    int flag = 0;
+    int ret_val = 0;
     for (int j = 0; j < i; j++)
     {
         // printf("%s\n", commands[j]);
-        execute_command(commands[j], init_dir);
+        ret_val = execute_command(commands[j], init_dir, old_wd);
+        if (ret_val == 3)
+        {
+            flag = 1;
+        }
     }
+    return flag;
 }

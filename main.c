@@ -16,7 +16,7 @@
 #define WHT   "\x1B[1;37m"
 #define RESET "\x1B[1;0m"
 
-void parse(char* str, char commands[500][500], char background[500][500], char init_dir[500]);
+int parse(char* str, char commands[500][500], char background[500][500], char init_dir[500], char old_wd[500]);
 
 
 void mainloop()
@@ -26,9 +26,11 @@ void mainloop()
     char init_dir[500];
     char cwd[500];
     char print_cwd[500];
+    char old_wd[500];
     char commands[500][500];
     char background[500][500];
     char* replace;
+    int flag = 0;
 
     getcwd(init_dir, sizeof(init_dir));
     if (init_dir == NULL)
@@ -36,6 +38,7 @@ void mainloop()
         perror("getcwd() error : ");
         return;
     }
+    strcpy(old_wd, init_dir);
 
     // get username from system using getpwuid()
     while (1)
@@ -77,7 +80,12 @@ void mainloop()
         char* input;
         size_t size = 0;
         getline(&input, &size, stdin);
-        parse(input, commands, background, init_dir);
+        flag = parse(input, commands, background, init_dir, old_wd);
+
+        if (flag == 1)
+        {
+            strcpy(old_wd, cwd);
+        }
         
         printf("\n");
 
