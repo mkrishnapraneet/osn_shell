@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-I.
 DEPS = headers.h
-OBJ = main.o pwd.o echo.o cd.o parse.o
+OBJ = main.o pwd.o echo.o cd.o parse.o ls.o ls_test.o
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
