@@ -3,13 +3,13 @@
 #include <string.h>
 #include <errno.h>
 
-void cd(char args[100][50], char init_dir[500], char old_wd[500])
+void cd(char** args, char init_dir[500], char old_wd[500])
 {
-    if (args[2][0] != '\0')
+    if (args[2] != NULL)
     {
         printf("Error: Too many arguments\n");
     }
-    else if (args[1][0] == '\0' || strcmp(args[1], "~") == 0)
+    else if (args[1] == NULL || strcmp(args[1], "~") == 0)
     {
         int val = chdir(init_dir);
         if (val == -1)

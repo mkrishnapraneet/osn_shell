@@ -6,14 +6,30 @@
 #include <errno.h>
 
 void ls_proto(char args[100][50]);
-void ls(char args[100][50], char init_dir[500]);
-void cd(char args[100][50], char init_dir[500], char old_wd[500]);
-void echo(char args[100][50]);
+void ls(char** args, char init_dir[500]);
+void cd(char** args, char init_dir[500], char old_wd[500]);
+void echo(char** args);
 void pwd();
+
+void free_mem(char** args, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        free(args[i]);
+    }
+    free(args);
+}
 
 int execute_command(char *command, char init_dir[500], char old_wd[500])
 {
-    char args[100][50];
+    // char args[100][50];
+    // declare args as 2D array using malloc
+    char **args = (char **)calloc(100, sizeof(char *));
+
+    for (int c = 0; c < 100; c++)
+    {
+        args[c] = (char *)calloc(50, sizeof(char));
+    }
     char *token;
     token = strtok(command, " \t\n");
     int i = 0;
@@ -23,36 +39,46 @@ int execute_command(char *command, char init_dir[500], char old_wd[500])
         token = strtok(NULL, " \t\n");
         i++;
     }
-    strcpy(args[i], "\0");
+
+    // strcpy(args[i], "\0");        ////////////// important
+
+    args[i] = NULL;
+
     // printf("%s\n", args[0]);
     if (strcmp(args[0], "exit") == 0 || strcmp(args[0], "quit") == 0)
     {
+        free_mem(args, 100);
         exit(0);
     }
     else if (strcmp(args[0], "pwd") == 0)
     {
         // printf("yes\n");
         pwd();
+        free_mem(args, 100);
         return 1;
     }
     else if (strcmp(args[0], "echo") == 0)
     {
         echo(args);
+        free_mem(args, 100);
         return 2;
     }
     else if (strcmp(args[0], "cd") == 0)
     {
         cd(args, init_dir, old_wd);
+        free_mem(args, 100);
         return 3;
     }
     else if (strcmp(args[0], "ls") == 0)
     {
         ls(args, init_dir);
+        free_mem(args, 100);
         return 4;
     }
     else
     {
         printf("Error : Command not found\n");
+        free_mem(args, 100);
         return 0;
     }
     // execvp(args[0], args[100][50]);

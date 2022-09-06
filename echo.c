@@ -3,10 +3,10 @@
 #include <string.h>
 #include <errno.h>
 
-void echo(char args[100][50])
+void echo(char** args)
 {
     int i = 1;
-    while (args[i][0] != '\0')
+    while (args[i] != NULL)
     {
         printf("%s ", args[i]);
         i++;

@@ -18,7 +18,7 @@
 #define CYN "\x1B[1;36m"
 #define WHT "\x1B[1;37m"
 
-void ls(char args[100][50], char init_dir[500])
+void ls(char** args, char init_dir[500])
 {
     struct dirent *de; // Pointer for directory entry
     struct dirent *de2;
@@ -29,7 +29,7 @@ void ls(char args[100][50], char init_dir[500])
     char paths[100][500] = {"\0"};
     int num_paths = 0;
     strcpy(paths[0], ".");
-    while (args[going][0] != '\0')
+    while (args[going] != NULL)
     {
         if (args[going][0] == '-')
         {
