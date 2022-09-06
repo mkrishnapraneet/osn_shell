@@ -4,14 +4,15 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 void ls_proto(char args[100][50]);
-void ls(char** args, char init_dir[500]);
-void cd(char** args, char init_dir[500], char old_wd[500]);
-void echo(char** args);
+void ls(char **args, char init_dir[500]);
+void cd(char **args, char init_dir[500], char old_wd[500]);
+void echo(char **args);
 void pwd();
 
-void free_mem(char** args, int size)
+void free_mem(char **args, int size)
 {
     for (int i = 0; i < size; i++)
     {
@@ -29,7 +30,9 @@ int execute_command(char *command, char init_dir[500], char old_wd[500])
     for (int c = 0; c < 100; c++)
     {
         args[c] = (char *)calloc(50, sizeof(char));
+        // args[c] = NULL;
     }
+
     char *token;
     token = strtok(command, " \t\n");
     int i = 0;
@@ -77,9 +80,32 @@ int execute_command(char *command, char init_dir[500], char old_wd[500])
     }
     else
     {
-        printf("Error : Command not found\n");
-        free_mem(args, 100);
-        return 0;
+        // printf("Error : Command not found\n");
+        pid_t pid;
+        pid = fork();
+        if (pid == 0)
+        {
+            int val_ret = execvp(args[0], args);
+            if (val_ret == -1)
+            {
+                perror("execvp() error");
+                free_mem(args, 100);
+                return -1;
+            }
+        }
+        else if (pid > 0)
+        {
+            int status;
+            waitpid(pid, &status, 0);
+            free_mem(args, 100);
+            return 5;
+        }
+        else
+        {
+            perror("fork() error");
+            free_mem(args, 100);
+            return -1;
+        }
     }
     // execvp(args[0], args[100][50]);
 }

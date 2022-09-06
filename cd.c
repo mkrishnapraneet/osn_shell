@@ -5,7 +5,13 @@
 
 void cd(char** args, char init_dir[500], char old_wd[500])
 {
-    if (args[2] != NULL)
+    int ch = 1;
+    while (args[ch] != NULL)
+    {
+        ch++;
+    }
+
+    if (ch > 2)
     {
         printf("Error: Too many arguments\n");
     }

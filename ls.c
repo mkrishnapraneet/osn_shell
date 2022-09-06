@@ -18,7 +18,7 @@
 #define CYN "\x1B[1;36m"
 #define WHT "\x1B[1;37m"
 
-void ls(char** args, char init_dir[500])
+void ls(char **args, char init_dir[500])
 {
     struct dirent *de; // Pointer for directory entry
     struct dirent *de2;
@@ -79,6 +79,7 @@ void ls(char** args, char init_dir[500])
 
         // DIR *dr = opendir(".");
         DIR *dr = opendir(paths[b]);
+    
         int is_file = 0;
 
         if (dr == NULL) // opendir returns NULL if couldn't open directory
