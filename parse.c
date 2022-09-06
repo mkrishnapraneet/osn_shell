@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <errno.h>
 
-void ls(char args[100][50]);
-void ls_test(char args[100][50], char init_dir[500]);
+void ls_proto(char args[100][50]);
+void ls(char args[100][50], char init_dir[500]);
 void cd(char args[100][50], char init_dir[500], char old_wd[500]);
 void echo(char args[100][50]);
 void pwd();
@@ -47,7 +47,7 @@ int execute_command(char *command, char init_dir[500], char old_wd[500])
     }
     else if (strcmp(args[0], "ls") == 0)
     {
-        ls_test(args, init_dir);
+        ls(args, init_dir);
         return 4;
     }
     else
