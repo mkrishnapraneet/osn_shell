@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <time.h>
 // #include <parse.c>
 
 #define RED "\x1B[1;31m"
@@ -36,6 +37,10 @@ void mainloop()
     char *replace;
     int flag = 0;
     struct parsed_comm parsed_commands[500];
+    time_t t1 = time(NULL);
+    time_t t2 = time(NULL);
+    int time_diff = 0;
+    char time_diff_str[500] = ""; ;
 
     getcwd(init_dir, sizeof(init_dir));
     if (init_dir == NULL)
@@ -78,14 +83,17 @@ void mainloop()
             strcpy(print_cwd, "~");
             strcat(print_cwd, temp);
         }
+        //get current time
+        
         // if (strcmp(cwd, init_dir) == 0)
         // strcpy(cwd, "~");
-        printf(CYN "<< " RESET RED "%s" RESET "@" BLU "%s" RESET ":" YEL "%s" RESET CYN " >> " RESET, username, hostname, print_cwd);
+        printf(CYN "<< " RESET RED "%s" RESET "@" BLU "%s" RESET ":" YEL "%s" RESET " || " MAG "%s" RESET CYN " >> " RESET, username, hostname, print_cwd, time_diff_str);
 
         // read input from user using getline()
         char *input;
         size_t size = 0;
         getline(&input, &size, stdin);
+        t1 = time(NULL);
         flag = parse(input, commands, parsed_commands, background, init_dir, old_wd);
 
         if (flag == 1)
@@ -94,6 +102,19 @@ void mainloop()
         }
 
         printf("\n");
+        t2 = time(NULL);
+        time_diff = t2 - t1;
+
+        if (time_diff > 1)
+        {
+            sprintf(time_diff_str, "%d", time_diff);
+            strcat(time_diff_str, " seconds");
+        }
+        else
+        {
+            strcpy(time_diff_str, "");
+        }
+
     }
 
     return;
