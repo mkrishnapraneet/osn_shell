@@ -6,6 +6,12 @@
 #include <errno.h>
 #include <sys/wait.h>
 
+struct parsed_comm
+{
+    char command[500];
+    int isBackgroundProcess;
+};
+
 void ls_proto(char args[100][50]);
 void ls(char **args, char init_dir[500]);
 void cd(char **args, char init_dir[500], char old_wd[500]);
@@ -21,11 +27,13 @@ void free_mem(char **args, int size)
     free(args);
 }
 
-int execute_command(char *command, char init_dir[500], char old_wd[500])
+int execute_command(struct parsed_comm parsed_command, char init_dir[500], char old_wd[500])
 {
     // char args[100][50];
     // declare args as 2D array using malloc
     char **args = (char **)calloc(100, sizeof(char *));
+
+    int isBackgroundProcess = parsed_command.isBackgroundProcess;
 
     for (int c = 0; c < 100; c++)
     {
@@ -34,7 +42,7 @@ int execute_command(char *command, char init_dir[500], char old_wd[500])
     }
 
     char *token;
-    token = strtok(command, " \t\n");
+    token = strtok(parsed_command.command, " \t\n");
     int i = 0;
     while (token != NULL)
     {
@@ -96,7 +104,21 @@ int execute_command(char *command, char init_dir[500], char old_wd[500])
         else if (pid > 0)
         {
             int status;
-            waitpid(pid, &status, 0);
+            if (isBackgroundProcess == 0)
+            {
+                int wait_val = waitpid(pid, &status, 0);
+                if (wait_val == -1)
+                {
+                    perror("waitpid() error");
+                    free_mem(args, 100);
+                    return -1;
+                }
+            }
+            else
+            {
+                printf("Process with PID %d started in the background\n", pid);
+            }
+            // waitpid(pid, &status, 0);
             free_mem(args, 100);
             return 5;
         }
@@ -110,12 +132,17 @@ int execute_command(char *command, char init_dir[500], char old_wd[500])
     // execvp(args[0], args[100][50]);
 }
 
-int parse(char *str, char commands[500][500], char background[500][500], char init_dir[500], char old_wd[500])
+int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500])
 {
     char *token;
-    token = strtok(str, ";");
+    token = strtok(str, ";\n");
     int i = 0;
-    int j = 0;
+    int e = 0;
+
+    for (int c = 0; c < 500; c++)
+    {
+        background[c][0] = '\0';
+    }
 
     while (token != NULL)
     {
@@ -130,16 +157,70 @@ int parse(char *str, char commands[500][500], char background[500][500], char in
 
         strcpy(commands[i], token);
         // commands[i][strlen(token)] = '\0';
-        token = strtok(NULL, ";");
+        token = strtok(NULL, ";\n");
         i++;
     }
     commands[i][0] = '\0';
+
+    // struct parsed_comm parsed_commands[500];
+
+    for (int c = 0; c < 500; c++)
+    {
+        parsed_commands[c].isBackgroundProcess = 0;
+    }
+
+    int ind = 0;
+    for (int c = 0; c < i; c++)
+    {
+        int num_ands = 0;
+        for (int w = 0; w < strlen(commands[c]); w++)
+        {
+            if (commands[c][w] == '&')
+            {
+                num_ands++;
+            }
+        }
+        // parse commands[c] for & and store in parsed_commands[c].command
+        char *n_token;
+        // if (commands[c][0] == '\0')
+        // {
+        //     continue;
+        // }
+        n_token = strtok(commands[c], "&\n");
+        int g = 0;
+        while (n_token != NULL)
+        {
+            strcpy(parsed_commands[ind].command, n_token);
+            n_token = strtok(NULL, "&\n");
+            ind++;
+            g++;
+        }
+        if (g > 1)
+        {
+
+            for (int z = ind - g; z < ind - 1; z++)
+            {
+                parsed_commands[z].isBackgroundProcess = 1;
+            }
+            if (num_ands == g)
+            {
+                // printf("Error : Invalid command\n");
+                // return -1;
+                parsed_commands[ind - 1].isBackgroundProcess = 1;
+            }
+        }
+        else if (g == 1 && num_ands == 1)
+        {
+            parsed_commands[ind - 1].isBackgroundProcess = 1;
+        }
+    }
+
     int flag = 0;
     int ret_val = 0;
-    for (int j = 0; j < i; j++)
+    for (int j = 0; j < ind; j++)
     {
         // printf("%s\n", commands[j]);
-        ret_val = execute_command(commands[j], init_dir, old_wd);
+        ret_val = execute_command(parsed_commands[j], init_dir, old_wd);
         if (ret_val == 3)
         {
             flag = 1;
