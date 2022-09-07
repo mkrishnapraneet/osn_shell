@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <time.h>
+#include <signal.h>
+#include <sys/wait.h>
 // #include <parse.c>
 
 #define RED "\x1B[1;31m"
@@ -16,13 +18,37 @@
 #define WHT "\x1B[1;37m"
 #define RESET "\x1B[1;0m"
 
+int parent_pid;
+
 struct parsed_comm
 {
     char command[500];
     int isBackgroundProcess;
 };
 
-int parse(char *str, char commands[500][500] , struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500]);
+int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500]);
+
+void sigchld_handler(int sign)
+{
+    if (getpid() != parent_pid)
+    {
+        return;
+    }
+
+    int status;
+    int pid = waitpid(-1, &status, WNOHANG); // WNOHANG is used so that wait doesn't block the program
+    if (pid > 0)
+    {
+        if (WIFEXITED(status))
+        {
+            printf("\nProcess with PID %d exited normally with status %d\n", pid, WEXITSTATUS(status));
+        }
+        else if (WIFSIGNALED(status))
+        {
+            printf("\nProcess with PID %d exited due to signal %d\n", pid, WTERMSIG(status));
+        }
+    }
+}
 
 void mainloop()
 {
@@ -40,7 +66,9 @@ void mainloop()
     time_t t1 = time(NULL);
     time_t t2 = time(NULL);
     int time_diff = 0;
-    char time_diff_str[500] = ""; ;
+    char time_diff_str[500] = "";
+    FILE *hist_file;
+    char prev_command[500] = "";
 
     getcwd(init_dir, sizeof(init_dir));
     if (init_dir == NULL)
@@ -49,6 +77,15 @@ void mainloop()
         return;
     }
     strcpy(old_wd, init_dir);
+
+    signal(SIGCHLD, sigchld_handler);
+
+    hist_file = fopen("history.txt", "a+");
+    if (hist_file == NULL)
+    {
+        perror("fopen() error");
+        return;
+    }
 
     // get username from system using getpwuid()
     while (1)
@@ -83,8 +120,8 @@ void mainloop()
             strcpy(print_cwd, "~");
             strcat(print_cwd, temp);
         }
-        //get current time
-        
+        // get current time
+
         // if (strcmp(cwd, init_dir) == 0)
         // strcpy(cwd, "~");
         printf(CYN "<< " RESET RED "%s" RESET "@" BLU "%s" RESET ":" YEL "%s" RESET " || " MAG "%s" RESET CYN " >> " RESET, username, hostname, print_cwd, time_diff_str);
@@ -93,8 +130,27 @@ void mainloop()
         char *input;
         size_t size = 0;
         getline(&input, &size, stdin);
+        if (input == NULL)
+        {
+            perror("getline() error");
+            return;
+        }
+        
+
+        // strcpy(input, input);
+        if (strcmp(input, prev_command) != 0)
+        {
+            // printf("--%s %s--", input, prev_command);
+            // store input in history file
+            fprintf(hist_file, "%s", input);
+            fflush(hist_file);
+        }
+
         t1 = time(NULL);
         flag = parse(input, commands, parsed_commands, background, init_dir, old_wd);
+
+        strcpy(prev_command, input);
+        // printf("$$%s %s$$", input, prev_command);
 
         if (flag == 1)
         {
@@ -114,7 +170,6 @@ void mainloop()
         {
             strcpy(time_diff_str, "");
         }
-
     }
 
     return;
@@ -122,6 +177,7 @@ void mainloop()
 
 int main()
 {
+    parent_pid = getpid();
     mainloop();
     return 0;
 }

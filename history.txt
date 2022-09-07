@@ -1,0 +1,157 @@
+ls -al
+cd ..
+cd osn_shell
+ls
+cat history.txt
+cat history.txt
+cat history.txt
+cd
+cd
+cd
+cat history.txt
+ls
+ls
+ls
+ls
+ls
+cat history.txt
+ cat history.txt
+
+ls
+ls -al
+cd /home/mkp
+cd
+cd
+cd
+cd
+cat history.txt
+cat history.txt
+sleep 2 &
+ls
+ls -al
+cd ..
+cd ./osn_shell
+ls
+cd discov_test
+ls
+discover
+cd OSN
+ls
+cd ..
+discover
+ls
+cd discov_test
+discover
+ls
+cd discov_test
+discover
+cd dis
+discover
+discover
+cd dis
+discover
+discover
+discover
+cd dis
+discover
+discover dis
+cd dis
+discover
+ls
+cd OSN
+ls
+cd sample
+discover ~/dis/
+cd dis
+discover
+discover
+discover .
+discover "osn.txt"
+cd dis
+discover 
+discover
+discover . "osn.txt"
+cd dis
+discover . "osn.txt"
+discover
+discover "osn.txt"
+discover .
+cd dis
+discover
+discover "osn.txt"
+discover . "osn.txt"
+discover .
+discover . ""
+discover . "osn.txt"
+cd dis
+discover "osn.txt"
+discover "osn.txt"
+discover . "osn.txt"
+discover
+discover .
+ls
+ls -al
+cd dis
+discover
+discover .
+discover "osn.txt"
+discover . "osn.txt"
+discover "ex"
+cd dis
+discover
+discover ex
+discover "ex"
+discover /home/mkp
+discover /home/mkp/academics/OSN
+discover /home/mkp/academics/
+clear
+cd dis
+discover "OSN"
+discover ./OSN "a.txt"
+discover /OSN
+dsicover
+discover
+discover OSN
+discover ./OSN
+cd ..
+discover
+discover "echo.c"
+discover "osn.txt"
+ls
+discover .
+cd dis
+discover
+discover
+ls
+discover .
+ls
+discover dis
+discover ./dis
+discover
+cd dis
+discover
+cd ..
+discover
+cd dis
+discover
+discover
+cd dis
+discover
+cd ..
+discover
+cd dis
+discover
+discover .
+discover ./OSN
+ls
+ls .
+ls ..
+ls test
+ls test -l .. ../..
+ls -al
+discover
+cd dis
+discover
+discover . "osn.txt"
+discover . "ex"
+discover ./OSN

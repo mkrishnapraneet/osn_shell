@@ -12,6 +12,8 @@ struct parsed_comm
     int isBackgroundProcess;
 };
 
+void discover(char ** args, char init_dir[500]);
+void pinfo(char **args, char init_dir[500]);
 void ls_proto(char args[100][50]);
 void ls(char **args, char init_dir[500]);
 void cd(char **args, char init_dir[500], char old_wd[500]);
@@ -86,6 +88,18 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
         free_mem(args, 100);
         return 4;
     }
+    else if (strcmp(args[0], "pinfo") == 0)
+    {
+        pinfo(args, init_dir);
+        free_mem(args, 100);
+        return 5;
+    }
+    else if (strcmp(args[0], "discover") == 0)
+    {
+        discover(args, init_dir);
+        free_mem(args, 100);
+        return 6;
+    }
     else
     {
         // printf("Error : Command not found\n");
@@ -120,7 +134,7 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
             }
             // waitpid(pid, &status, 0);
             free_mem(args, 100);
-            return 5;
+            return 9;
         }
         else
         {
@@ -213,6 +227,12 @@ int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands
         {
             parsed_commands[ind - 1].isBackgroundProcess = 1;
         }
+        // else if (g == 0)
+        // {
+        //     printf("Error : Invalid command\n");
+        //     return -1;
+        //     // continue;
+        // }
     }
 
     int flag = 0;

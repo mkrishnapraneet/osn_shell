@@ -52,20 +52,21 @@ void ls(char **args, char init_dir[500])
                 r++;
             }
         }
-        else if ((args[going][0] != '~') && (args[going][0] != '/'))
-        {
-            strcpy(paths[num_paths], "./");
-            strcat(paths[num_paths], args[going]);
-            num_paths++;
-            // printf("Error : Invalid flag\n");
-            // return;
-        }
         else if (args[going][0] == '~')
         {
             strcpy(paths[num_paths], init_dir);
             strcat(paths[num_paths], args[going] + 1);
             num_paths++;
         }
+        else if (args[going][0] == '.' && args[going][1] == '/')
+        {
+            // strcpy(paths[num_paths], "./");
+            strcat(paths[num_paths], args[going]);
+            num_paths++;
+            // printf("Error : Invalid flag\n");
+            // return;
+        }
+        
         else
         {
             strcpy(paths[num_paths], args[going]);
