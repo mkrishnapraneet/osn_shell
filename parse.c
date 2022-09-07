@@ -29,7 +29,7 @@ void free_mem(char **args, int size)
     free(args);
 }
 
-int execute_command(struct parsed_comm parsed_command, char init_dir[500], char old_wd[500])
+int execute_command(struct parsed_comm parsed_command, char init_dir[500], char old_wd[500], char history[20][500])
 {
     // char args[100][50];
     // declare args as 2D array using malloc
@@ -62,6 +62,7 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
     {
         free_mem(args, 100);
         exit(0);
+        // return 0;
     }
     else if (strcmp(args[0], "pwd") == 0)
     {
@@ -99,6 +100,16 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
         discover(args, init_dir);
         free_mem(args, 100);
         return 6;
+    }
+    else if (strcmp(args[0], "history") == 0)
+    {
+        // discover(args, init_dir);
+        for (int k = 0; k < 10; k++)
+        {
+            printf("%s\n", history[k]);
+        }
+        free_mem(args, 100);
+        return 7;
     }
     else
     {
@@ -146,7 +157,7 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
     // execvp(args[0], args[100][50]);
 }
 
-int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500])
+int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500], char history[20][500])
 {
     char *token;
     token = strtok(str, ";\n");
@@ -240,7 +251,7 @@ int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands
     for (int j = 0; j < ind; j++)
     {
         // printf("%s\n", commands[j]);
-        ret_val = execute_command(parsed_commands[j], init_dir, old_wd);
+        ret_val = execute_command(parsed_commands[j], init_dir, old_wd, history);
         if (ret_val == 3)
         {
             flag = 1;

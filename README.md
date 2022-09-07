@@ -1,5 +1,5 @@
 # osn_shell
-Making a minimum shell for OSN course
+Making a C shell for OSN course
 
 commands to run:
 
@@ -8,3 +8,6 @@ make
 
 2 )
 ./shell
+
+
+in history, up is recent
