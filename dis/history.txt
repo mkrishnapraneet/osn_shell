@@ -1,3 +1,7 @@
+sleep 5
+sleep 50 
+sudo apt install emacs
+sudo apt intall emacs
 history
 ls -al 
 pinfo 146986
@@ -14,7 +18,3 @@ sleep 20 &
 pinfo
 pnfo
 \pinfo
-pinfo
-pinfo 142299
-pinfo
-pinfo 142299

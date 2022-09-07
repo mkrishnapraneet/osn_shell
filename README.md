@@ -17,3 +17,5 @@ Assumptions :
 3. When printing the time taken for execution of processes in the prompt, I display the total time taken by all the foreground processes that ran in that command.
 4. The Virtual Memory allocated that is displayed in the 'piinfo' command is automatically displayed in the best units (kB, etc)
 5. The output in 'discover' is not alphabetically sorted.
+6. The directory from where the shell is launched will be set as the home (~) directory for the shell.
+7. The paths should not contain any spaces.
