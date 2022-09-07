@@ -189,7 +189,7 @@ void discover(char **args, char init_dir[500])
     char all_comps[500][500] = {"\0"};
     char comps_to_rep[500][500] = {"\0"};
 
-    if (d_flag == 0 && f_flag == 0)
+    if ((d_flag == 0 && f_flag == 0) || (d_flag == 1 && f_flag == 1))
     {
         if (strcmp(file_to_search, "\0") == 0)
         {
@@ -218,6 +218,100 @@ void discover(char **args, char init_dir[500])
                 if (len >= len2)
                 {
                     if ((strcmp(all_comps[i] + len - len2, file_to_search) == 0) && (all_comps[i][len - len2 - 1] == '/'))
+
+                    {
+                        printf("%s\n", all_comps[i]);
+                    }
+                }
+                i++;
+            }
+        }
+    }
+
+    else if (d_flag == 1)
+    {
+        if (strcmp(file_to_search, "\0") == 0)
+        {
+            // list all directories recursively
+            list_all_components(target_dir, all_comps, 0);
+            // print all_comps
+            int i = 0;
+            int val = 0;
+            struct stat file_stat;
+            while (strcmp(all_comps[i], "\0") != 0)
+            {
+                val = stat(all_comps[i], &file_stat);
+                if (S_ISDIR(file_stat.st_mode))
+                {
+                    printf("%s\n", all_comps[i]);
+                }
+                i++;
+
+                // printf("%s\n", all_comps[i]);
+                // i++;
+            }
+        }
+        else
+        {
+            list_all_components(target_dir, all_comps, 0);
+            // print ones that end with file_to_search
+            int i = 0;
+            struct stat file_stat;
+            while (strcmp(all_comps[i], "\0") != 0)
+            {
+                int len = strlen(all_comps[i]);
+                int len2 = strlen(file_to_search);
+                int val = stat(all_comps[i], &file_stat);
+                if (len >= len2)
+                {
+                    if ((strcmp(all_comps[i] + len - len2, file_to_search) == 0) && (all_comps[i][len - len2 - 1] == '/') && (S_ISDIR(file_stat.st_mode)))
+
+                    {
+                        printf("%s\n", all_comps[i]);
+                    }
+                }
+                i++;
+            }
+        }
+    }
+
+    else if (f_flag == 1)
+    {
+        if (strcmp(file_to_search, "\0") == 0)
+        {
+            // list all directories recursively
+            list_all_components(target_dir, all_comps, 0);
+            // print all_comps
+            int i = 0;
+            int val = 0;
+            struct stat file_stat;
+            while (strcmp(all_comps[i], "\0") != 0)
+            {
+                val = stat(all_comps[i], &file_stat);
+                if (!(S_ISDIR(file_stat.st_mode)))
+                {
+                    printf("%s\n", all_comps[i]);
+                }
+                i++;
+
+                // printf("%s\n", all_comps[i]);
+                // i++;
+            }
+        }
+        else
+        {
+            list_all_components(target_dir, all_comps, 0);
+            // print ones that end with file_to_search
+            int i = 0;
+            struct stat file_stat;
+            while (strcmp(all_comps[i], "\0") != 0)
+            {
+                int len = strlen(all_comps[i]);
+                int len2 = strlen(file_to_search);
+                int val = stat(all_comps[i], &file_stat);
+                if (len >= len2)
+                {
+                    if ((strcmp(all_comps[i] + len - len2, file_to_search) == 0) && (all_comps[i][len - len2 - 1] == '/') && (!(S_ISDIR(file_stat.st_mode))))
 
                     {
                         printf("%s\n", all_comps[i]);

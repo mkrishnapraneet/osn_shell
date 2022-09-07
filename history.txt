@@ -155,3 +155,55 @@ discover
 discover . "osn.txt"
 discover . "ex"
 discover ./OSN
+ls
+discover
+cd dis
+discover
+discover . "osn.txt"
+sleep 2& sleep 4
+cd dis
+discover -d -f
+discover -d -f "osn.txt"
+discover ./OSN -d -f "osn.txt"
+discover ..
+ls
+ls -a
+ls -al
+sleep 2 & ;
+discover
+cd dis
+discover
+discover -f
+discover -d
+discover . -f
+discover . -d
+discover ./OSN -d
+discover "this"
+discover
+discover ./dis
+discover dis 
+cd dis
+discover .
+discover -f
+discover -d
+discover "osn"
+discover "osn.txt"
+discover -f "osn.txt"
+discover -d "osn.txt"
+discover -f "OSN"
+discover -d "OSN"
+discover .. echo.c -f
+discover .. "echo.c" -f
+discover .. -d "test"
+discover .. -d -f "test"
+discover .. -d -f "echo.c"
+pinfo
+sleep 30 &
+pinfo 108913
+discover ..
+discover .. -d
+discover .. ".git" -d
+discover .. -f 
+discover ~/ -d
+pinfo 
+history
