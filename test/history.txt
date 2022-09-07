@@ -1,3 +1,6 @@
+cd ../test
+cd test
+cd dis
 cd -
 
 
@@ -16,6 +19,3 @@ pinfo
 discover ./dis -f
 ls /home/mkp -al
 ls .. -al
-ls -al
-ls aq
-ls -a

@@ -30,21 +30,6 @@ struct parsed_comm
 
 int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500], char history[20][500]);
 
-// void sig_end_handler(int sig_num, char history[20][500])
-// {
-//     // printf("\n");
-//     // fflush(stdout);
-//     printf("YOOO\n");
-//     hist_file = fopen("history.txt", "w");
-
-//     for (int k = 0;k < 20; k++)
-//     {
-//         fprintf(hist_file, "%s", history[k]);
-
-//     }
-//     fclose(hist_file);
-// }
-
 void sigchld_handler(int sign)
 {
     if (getpid() != parent_pid)
@@ -56,12 +41,27 @@ void sigchld_handler(int sign)
     int pid = waitpid(-1, &status, WNOHANG); // WNOHANG is used so that wait doesn't block the program
     if (pid > 0)
     {
+        // char buffer[500];
+        // sprintf(buffer, "/proc/%d/cmdline", pid);
+        // FILE *fd = fopen(buffer, "r");
+        // if (fd == NULL)
+        // {
+        //     printf("Error: %s\n", strerror(errno));
+        //     return;
+        // }
+        // char *pname;
+        // long size = 0;
+        // getline(&pname, &size, fd);
+        // char pname[500];
+        // fgets(pname, 500, fd);
         if (WIFEXITED(status))
         {
+            // printf("\n%s with PID %d exited normally with status %d\n", pname, pid, WEXITSTATUS(status));
             printf("\nProcess with PID %d exited normally with status %d\n", pid, WEXITSTATUS(status));
         }
         else if (WIFSIGNALED(status))
         {
+            // printf("\n%s with PID %d exited due to signal %d\n", pname, pid, WTERMSIG(status));
             printf("\nProcess with PID %d exited due to signal %d\n", pid, WTERMSIG(status));
         }
     }

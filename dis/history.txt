@@ -1,3 +1,12 @@
+sleep 2 & pwd
+disover ./
+discover .
+discover 
+sleep 4
+cd -
+cd ../test
+cd test
+cd dis
 cd -
 
 
@@ -10,12 +19,3 @@ clear
 sleep 4 &
 sleep &
 gedit &
-pinfo 132456
-gedit &
-pinfo
-discover ./dis -f
-ls /home/mkp -al
-ls .. -al
-ls -al
-ls aq
-ls -a

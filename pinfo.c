@@ -57,8 +57,16 @@ void pinfo(char **args, char init_dir[500])
     char state;
     fscanf(fd1, "%*d %*s %c", &state);
 
-    printf("Process State : %c\n", state);
-    fclose(fd1);
+    if (state == 'R')
+    {
+        printf("Process State : R+\n");
+        fclose(fd1);
+    }
+    else
+    {
+        printf("Process State : %c\n", state);
+        fclose(fd1);
+    }
 
     char buffer[500];
     char *temp;
@@ -72,7 +80,7 @@ void pinfo(char **args, char init_dir[500])
     }
     // printf("pid -- %d\n", pid); // PID value
 
-    for (int i = 0; i < 3; ++i) // Status present on 3rd line
+    for (int i = 0; i < 3; ++i) // Status
         getline(&temp, &size, fd);
     // printf("%s", temp);
 
