@@ -1,3 +1,16 @@
+pwd
+
+
+sleep 4 & sleep 2
+gedit &
+sleep 2 &
+sleep 2
+discover -f ./dis
+discover ./dis
+ls /home/mkp/academics -al
+ls /home/mkp /academics -al
+ls -al
+ls
 cd -
 
 
@@ -6,16 +19,3 @@ pinfo 132574
 gedit & sleep 50 &
 history
 gedit & sleep 5 & pwd
-clear
-sleep 4 &
-sleep &
-gedit &
-pinfo 132456
-gedit &
-pinfo
-discover ./dis -f
-ls /home/mkp -al
-ls .. -al
-ls -al
-ls aq
-ls -a

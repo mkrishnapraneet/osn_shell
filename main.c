@@ -21,14 +21,20 @@
 int parent_pid;
 FILE *hist_file;
 // char history[20][500];
-
+struct background_process
+{
+    int pid;
+    char name[500];
+    // int status;
+};
+struct background_process back_proc[500];
 struct parsed_comm
 {
     char command[500];
     int isBackgroundProcess;
 };
 
-int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500], char history[20][500]);
+int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500]);
 
 void sigchld_handler(int sign)
 {
@@ -56,13 +62,29 @@ void sigchld_handler(int sign)
         // fgets(pname, 500, fd);
         if (WIFEXITED(status))
         {
+            // iterate over the background processes and find the one with the pid
+            int i = 0;
+            while (back_proc[i].pid != pid)
+            {
+                i++;
+            }
+
             // printf("\n%s with PID %d exited normally with status %d\n", pname, pid, WEXITSTATUS(status));
-            printf("\nProcess with PID %d exited normally with status %d\n", pid, WEXITSTATUS(status));
+            printf("\n%s with PID %d exited normally with status %d\n", back_proc[i].name, pid, WEXITSTATUS(status));
+            back_proc[i].pid = -1;
         }
         else if (WIFSIGNALED(status))
         {
+            // iterate over the background processes and find the one with the pid
+            int i = 0;
+            while (back_proc[i].pid != pid)
+            {
+                i++;
+            }
+
             // printf("\n%s with PID %d exited due to signal %d\n", pname, pid, WTERMSIG(status));
-            printf("\nProcess with PID %d exited due to signal %d\n", pid, WTERMSIG(status));
+            printf("\n%s with PID %d exited due to signal %d\n", back_proc[i].name, pid, WTERMSIG(status));
+            back_proc[i].pid = -1;
         }
     }
 }
@@ -86,6 +108,16 @@ void mainloop(char history[20][500])
     char time_diff_str[500] = "";
 
     char prev_command[500] = "";
+
+    // struct background_process background_processes[500];
+    // allocate memory for background processes dynamically
+
+    // initialize background processes
+    for (int i = 0; i < 500; i++)
+    {
+        back_proc[i].pid = -1;
+        strcpy(back_proc[i].name, "");
+    }
 
     getcwd(init_dir, sizeof(init_dir));
     if (init_dir == NULL)
@@ -165,7 +197,7 @@ void mainloop(char history[20][500])
         // }
 
         t1 = time(NULL);
-        flag = parse(input, commands, parsed_commands, background, init_dir, old_wd, history);
+        flag = parse(input, commands, parsed_commands, background, init_dir, old_wd, history, back_proc);
 
         // strcpy(prev_command, input);
         // printf("$$%s %s$$", input, prev_command);

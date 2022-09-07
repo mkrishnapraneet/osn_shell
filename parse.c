@@ -12,7 +12,14 @@ struct parsed_comm
     int isBackgroundProcess;
 };
 
-void discover(char ** args, char init_dir[500]);
+struct background_process
+{
+    int pid;
+    char name[500];
+    // int status;
+};
+
+void discover(char **args, char init_dir[500]);
 void pinfo(char **args, char init_dir[500]);
 void ls_proto(char args[100][50]);
 void ls(char **args, char init_dir[500]);
@@ -29,7 +36,7 @@ void free_mem(char **args, int size)
     free(args);
 }
 
-int execute_command(struct parsed_comm parsed_command, char init_dir[500], char old_wd[500], char history[20][500])
+int execute_command(struct parsed_comm parsed_command, char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500])
 {
     // char args[100][50];
     // declare args as 2D array using malloc
@@ -142,6 +149,14 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
             else
             {
                 printf("Process with PID %d started in the background\n", pid);
+                // iterate to found the first empty slot in the array
+                int i = 0;
+                while (back_proc[i].pid != -1)
+                {
+                    i++;
+                }
+                back_proc[i].pid = pid;
+                strcpy(back_proc[i].name, args[0]);
             }
             // waitpid(pid, &status, 0);
             free_mem(args, 100);
@@ -157,7 +172,7 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
     // execvp(args[0], args[100][50]);
 }
 
-int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500], char history[20][500])
+int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500])
 {
     char *token;
     token = strtok(str, ";\n");
@@ -251,7 +266,7 @@ int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands
     for (int j = 0; j < ind; j++)
     {
         // printf("%s\n", commands[j]);
-        ret_val = execute_command(parsed_commands[j], init_dir, old_wd, history);
+        ret_val = execute_command(parsed_commands[j], init_dir, old_wd, history, back_proc);
         if (ret_val == 3)
         {
             flag = 1;
