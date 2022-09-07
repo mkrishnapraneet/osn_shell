@@ -54,12 +54,33 @@ void pinfo(char **args, char init_dir[500])
     }
 
     // get state of the process from /proc/<pid>/stat
-    char state;
+    char state = 0;
     fscanf(fd1, "%*d %*s %c", &state);
+    fclose(fd1);
 
-    if (state == 'R')
+    fopen(proc_stat_path, "r");
+
+    int fore = 0;
+
+    fscanf(fd1, "%*d %*s %*c %*d %*d %*d %*d %d", &fore);
+
+    // printf("fore : %d\n", fore);
+
+    int foreground_flag = 0;
+
+    if (fore == pid)
+    {
+        foreground_flag = 1;
+    }
+
+    if (state == 'R' && foreground_flag == 1)
     {
         printf("Process State : R+\n");
+        fclose(fd1);
+    }
+    else if (state == 'S' && foreground_flag == 1)
+    {
+        printf("Process State : S+\n");
         fclose(fd1);
     }
     else

@@ -1,21 +1,20 @@
-sleep 2 & pwd
-disover ./
-discover .
-discover 
-sleep 4
-cd -
-cd ../test
-cd test
-cd dis
-cd -
-
-
-pinfo 132575
-pinfo 132574
-gedit & sleep 50 &
 history
-gedit & sleep 5 & pwd
-clear
-sleep 4 &
-sleep &
+ls -al 
+pinfo 146986
+pinfo 146985
+sleep 40 & sleep 50 &
+pinfo
+pinfo 146892
 gedit &
+pinfo 144214
+sleep 18 &
+pinfo
+pinfo 144025
+sleep 20 &
+pinfo
+pnfo
+\pinfo
+pinfo
+pinfo 142299
+pinfo
+pinfo 142299
