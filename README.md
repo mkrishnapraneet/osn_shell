@@ -19,3 +19,7 @@ Assumptions :
 5. The output in 'discover' is not alphabetically sorted.
 6. The directory from where the shell is launched will be set as the home (~) directory for the shell.
 7. The paths should not contain any spaces.
+
+*******************NOTE***********************
+
+For Mid submission of Assignment 3, I have implemented PIPELINING

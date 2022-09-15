@@ -1,20 +1,22 @@
-\
-|
-discover |
+>>
+<
+
+
+echo this > test.txt
+history | grep gedit
+clear
+
+
+gedit &
+sleep 5 & gedit
+cd dis
 discover -d
-discover
-cd ../dis
-discover
-cd test
-cd trest
-discover
+ls -a
 ls
-cd -
-cd ~
 ls -al
-discover "osn.txt"
-discover -f
-discover -d 
-discover
+echo this and t	hat
+echo
+ls -al
+echo
+root:x:0:0:root:/root:/usr/bin/zsh
 ls
-cd ..

@@ -5,6 +5,20 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <fcntl.h>
+
+struct inp_out
+{
+    int isInputFile;
+    int isOutputFile;
+};
+
+struct redir_flags
+{
+    int in;
+    int out;
+    int append;
+};
 
 struct parsed_comm
 {
@@ -18,6 +32,9 @@ struct background_process
     char name[500];
     // int status;
 };
+
+int input_fd = 0;
+int output_fd = 1;
 
 void discover(char **args, char init_dir[500]);
 void pinfo(char **args, char init_dir[500]);
@@ -36,8 +53,120 @@ void free_mem(char **args, int size)
     free(args);
 }
 
-int act_execute(char **args, char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500], int isBackgroundProcess)
+struct inp_out redirect(char **args)
 {
+    int i = 0;
+    struct inp_out io;
+    io.isInputFile = 0;
+    io.isOutputFile = 0;
+    while (args[i] != NULL)
+    {
+        if (strcmp(args[i], "<") == 0)
+        {
+            input_fd = open(args[++i], O_RDONLY);
+            if (input_fd < 0)
+            {
+                perror("Error opening input file");
+                return io;
+            }
+            io.isInputFile = 1;
+            // remove the < and the file name from the args take care of null pointer
+            int j = i + 1;
+            if (args[j] == NULL)
+            {
+                args[i - 1] = NULL;
+            }
+            else
+            {
+                while (args[j] != NULL)
+                {
+                    args[j - 2] = args[j];
+                    j++;
+                }
+                args[j - 2] = NULL;
+            }
+        }
+        else if (strcmp(args[i], ">") == 0)
+        {
+            output_fd = open(args[++i], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            if (output_fd < 0)
+            {
+                perror("Error opening output file");
+                return io;
+            }
+            io.isOutputFile = 1;
+            // remove the > and the file name from the args
+            int j = i + 1;
+            if (args[j] == NULL)
+            {
+                args[i - 1] = NULL;
+            }
+            else
+            {
+                while (args[j] != NULL)
+                {
+                    args[j - 2] = args[j];
+                    j++;
+                }
+                args[j - 2] = NULL;
+            }
+        }
+        else if (strcmp(args[i], ">>") == 0)
+        {
+            output_fd = open(args[++i], O_WRONLY | O_CREAT | O_APPEND, 0644);
+            if (output_fd < 0)
+            {
+                perror("Error opening output file");
+                return io;
+            }
+            io.isOutputFile = 1;
+            // remove the >> and the file name from the args
+            int j = i + 1;
+            if (args[j] == NULL)
+            {
+                args[i - 1] = NULL;
+            }
+            else
+            {
+                while (args[j] != NULL)
+                {
+                    args[j - 2] = args[j];
+                    j++;
+                }
+                args[j - 2] = NULL;
+            }
+        }
+
+        i++;
+    }
+    // printf("yes");
+    return io;
+}
+
+int act_execute(char **args, char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500], int isBackgroundProcess, struct redir_flags redir_flags, int sav_stdin, int sav_stdout)
+{
+    if (redir_flags.in + redir_flags.out + redir_flags.append > 2)
+    {
+        printf("Error: Multiple redirections not allowed");
+        return 1;
+    }
+    input_fd = 0;
+    output_fd = 1;
+
+    struct inp_out io = redirect(args);
+
+    if (io.isInputFile)
+    {
+        dup2(input_fd, 0);
+        close(input_fd);
+    }
+
+    if (io.isOutputFile)
+    {
+        dup2(output_fd, 1);
+        close(output_fd);
+    }
+
     // printf("%s\n", args[0]);
     if (strcmp(args[0], "exit") == 0 || strcmp(args[0], "quit") == 0)
     {
@@ -143,9 +272,10 @@ int act_execute(char **args, char init_dir[500], char old_wd[500], char history[
             return -1;
         }
     }
+    exit(0);
 }
 
-void piping(char **args, char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500], int isBackgroundProcess)
+void piping(char **args, char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500], int isBackgroundProcess, struct redir_flags redir_flags, int sav_stdin, int sav_stdout)
 {
     // concatenate all the args into a single string with spaces
     char full_command[500];
@@ -211,7 +341,9 @@ void piping(char **args, char init_dir[500], char old_wd[500], char history[20][
             command_args[j] = NULL;
 
             // printf("%s: pop\n",command_pipe[0] );
-            act_execute(command_args, init_dir, old_wd, history, back_proc, isBackgroundProcess);
+            act_execute(command_args, init_dir, old_wd, history, back_proc, isBackgroundProcess, redir_flags, sav_stdin, sav_stdout);
+            dup2(sav_stdin, 0);
+            dup2(sav_stdout, 1);
             // printf("done\n" );
             // free_mem(command_pipe, 500);
             exit(2);
@@ -240,6 +372,9 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
         // args[c] = NULL;
     }
 
+    int sav_stdin = dup(0);
+    int sav_stdout = dup(1);
+
     char *token;
     token = strtok(parsed_command.command, " \t\n");
     int i = 0;
@@ -256,41 +391,41 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
 
     // check if args has '|' or '<' or '>' or '>>'
     int pipe_flag = 0;
-    int input_redir_flag = 0;
-    int output_redir_flag = 0;
-    int append_redir_flag = 0;
+
+    struct redir_flags redir_flags;
+    redir_flags.in = 0;
+    redir_flags.out = 0;
+    redir_flags.append = 0;
 
     for (int j = 0; j < i; j++)
     {
         if (strcmp(args[j], "|") == 0)
         {
             pipe_flag = 1;
-            // pipe_index = j;
         }
         if (strcmp(args[j], "<") == 0)
         {
-            input_redir_flag = 1;
-            // input_redir_index = j;
+            redir_flags.in = 1;
         }
         if (strcmp(args[j], ">") == 0)
         {
-            output_redir_flag = 1;
-            // output_redir_index = j;
+            redir_flags.out = 1;
         }
         if (strcmp(args[j], ">>") == 0)
         {
-            append_redir_flag = 1;
-            // append_redir_index = j;
+            redir_flags.append = 1;
         }
     }
 
     if (pipe_flag == 1)
     {
-        piping(args, init_dir, old_wd, history, back_proc, isBackgroundProcess);
+        piping(args, init_dir, old_wd, history, back_proc, isBackgroundProcess, redir_flags, sav_stdin, sav_stdout);
     }
     else
     {
-        int ret_val = act_execute(args, init_dir, old_wd, history, back_proc, isBackgroundProcess);
+        int ret_val = act_execute(args, init_dir, old_wd, history, back_proc, isBackgroundProcess, redir_flags, sav_stdin, sav_stdout);
+        dup2(sav_stdin, 0);
+        dup2(sav_stdout, 1);
         return ret_val;
     }
     // execvp(args[0], args[100][50]);

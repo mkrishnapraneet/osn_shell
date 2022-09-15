@@ -1,0 +1,10 @@
+history
+cat history.txt
+echo thththth
+echo < history.txt
+code
+cat < mihir.txt
+ls > mihir.txt
+ls
+cat v.txt
+echo added >> v.txt

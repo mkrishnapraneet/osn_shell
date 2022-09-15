@@ -1,0 +1,13 @@
+echo this 	 that
+sleep 4 & gedit & ls -al
+clear
+history | grep a
+history
+cat < history.txt
+history
+cat < history.txt
+history
+history | grep a
+
+[1;36m<< [1;0m[1;31mmkp[1;0m@[1;34mm-krishna-praneet[1;0m:[1;33m~[1;0m || [1;35m[1;0m[1;36m >> [1;0m
+[1;36m<< [1;0m[1;31mmkp[1;0m@[1;34mm-krishna-praneet[1;0m:[1;33m~[1;0m || [1;35m[1;0m[1;36m >> [1;0m

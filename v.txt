@@ -1,0 +1,6 @@
+echo hello > echo.txt
+cat < grepres.txt
+ls | grep echo > grepres.txt
+cat < list.txt
+ls -al > list.txt
+added 

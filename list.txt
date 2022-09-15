@@ -1,0 +1,39 @@
+[1m.[0m: 
+drwxrwxr-x	12	mkp mkp		4096		Sep  15  11:09	[1m[1;34m	..[0m
+drwxrwxr-x	8	mkp mkp		4096		Sep  15  13:21	[1m[1;34m	.git[0m
+drwxrwxr-x	6	mkp mkp		4096		Sep  15  13:48	[1m[1;34m	.[0m
+-rwxrwxr-x	1	mkp mkp		75648		Sep   7  23:37	[1m[1;32m	a.out[0m
+-rw-rw-r--	1	mkp mkp		72470		Sep  11  05:29		assi.pdf
+-rw-rw-r--	1	mkp mkp		1182		Sep   6  19:30		cd.c
+-rw-rw-r--	1	mkp mkp		2592		Sep  15  01:11		cd.o
+-rw-rw-r--	1	mkp mkp		9150		Sep   7  16:20		discover.c
+-rw-rw-r--	1	mkp mkp		7784		Sep  15  01:11		discover.o
+drwxrwxr-x	4	mkp mkp		4096		Sep  15  09:46	[1m[1;34m	dis[0m
+-rw-rw-r--	1	mkp mkp		224		Sep   6  18:28		echo.c
+-rw-rw-r--	1	mkp mkp		1824		Sep  15  01:11		echo.o
+drwxrwxr-x	2	mkp mkp		4096		Sep  15  13:47	[1m[1;34m	free[0m
+-rw-rw-r--	1	mkp mkp		0		Aug  30  00:31		headers.h
+-rw-rw-r--	1	mkp mkp		186		Sep  15  13:48		history.txt
+-rw-r--r--	1	mkp mkp		368		Sep  15  12:20		hmm.txt
+-rw-rw-r--	1	mkp mkp		1072		Aug  29  23:35		LICENSE
+-rw-r--r--	1	mkp mkp		20		Sep  15  13:13		lines.txt
+-rw-r--r--	1	mkp mkp		1017		Sep  15  13:48		list.txt
+-rw-rw-r--	1	mkp mkp		12236		Sep   7  13:53		ls.c
+-rw-rw-r--	1	mkp mkp		11016		Sep  15  01:11		ls.o
+-rw-r--r--	1	mkp mkp		147		Sep  15  12:19		ls.txt
+-rw-rw-r--	1	mkp mkp		9630		Sep   6  05:48		ls_proto.c
+-rw-rw-r--	1	mkp mkp		7413		Sep   7  22:13		main.c
+-rw-rw-r--	1	mkp mkp		7104		Sep  15  01:11		main.o
+-rw-rw-r--	1	mkp mkp		210		Sep   7  10:34		makefile
+-rw-r--r--	1	mkp mkp		90		Sep  15  13:39		mihir.txt
+-rw-rw-r--	1	mkp mkp		13441		Sep  15  13:46		parse.c
+-rw-rw-r--	1	mkp mkp		11880		Sep  15  13:47		parse.o
+-rw-rw-r--	1	mkp mkp		2949		Sep   7  23:26		pinfo.c
+-rw-rw-r--	1	mkp mkp		5040		Sep  15  01:11		pinfo.o
+-rw-rw-r--	1	mkp mkp		233		Aug  31  05:03		pwd.c
+-rw-rw-r--	1	mkp mkp		1728		Sep  15  01:11		pwd.o
+-rw-rw-r--	1	mkp mkp		905		Sep  15  11:09		README.md
+-rwxrwxr-x	1	mkp mkp		40360		Sep  15  13:47	[1m[1;32m	shell[0m
+drwxrwxr-x	3	mkp mkp		4096		Sep   7  20:36	[1m[1;34m	test[0m
+-rw-rw-r--	1	mkp mkp		1309		Sep   7  12:05		test.c
+
