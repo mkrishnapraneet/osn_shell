@@ -36,34 +36,8 @@ void free_mem(char **args, int size)
     free(args);
 }
 
-int execute_command(struct parsed_comm parsed_command, char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500])
+int act_execute(char **args, char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500], int isBackgroundProcess)
 {
-    // char args[100][50];
-    // declare args as 2D array using malloc
-    char **args = (char **)calloc(100, sizeof(char *));
-
-    int isBackgroundProcess = parsed_command.isBackgroundProcess;
-
-    for (int c = 0; c < 100; c++)
-    {
-        args[c] = (char *)calloc(50, sizeof(char));
-        // args[c] = NULL;
-    }
-
-    char *token;
-    token = strtok(parsed_command.command, " \t\n");
-    int i = 0;
-    while (token != NULL)
-    {
-        strcpy(args[i], token);
-        token = strtok(NULL, " \t\n");
-        i++;
-    }
-
-    // strcpy(args[i], "\0");        ////////////// important
-
-    args[i] = NULL;
-
     // printf("%s\n", args[0]);
     if (strcmp(args[0], "exit") == 0 || strcmp(args[0], "quit") == 0)
     {
@@ -168,6 +142,156 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
             free_mem(args, 100);
             return -1;
         }
+    }
+}
+
+void piping(char **args, char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500], int isBackgroundProcess)
+{
+    // concatenate all the args into a single string with spaces
+    char full_command[500];
+    strcpy(full_command, "");
+    int i = 0;
+    while (args[i] != NULL)
+    {
+        strcat(full_command, args[i]);
+        strcat(full_command, " ");
+        i++;
+    }
+
+    int j = 0;
+    int input_fd = 0;
+    char command[50][500];
+    i = 0;
+    char *token = strtok(full_command, "|");
+    while (token != NULL)
+    {
+        strcpy(command[i], token);
+        command[i++][strlen(token)] = '\0';
+        token = strtok(NULL, "|");
+    }
+
+    command[i][0] = '\0';
+
+    for (i = 0; command[i][0] != '\0'; ++i)
+    {
+        int pipefd[2];
+        pipe(pipefd); // create a pipe connection
+
+        pid_t pid = fork();
+
+        if (pid == 0)
+        {
+            dup2(input_fd, 0); // change the input according to the old one
+
+            if (command[i + 1][0] != '\0')
+            {
+                dup2(pipefd[1], 1); // change the output according to the pipe
+            }
+
+            close(pipefd[0]); // close the reading end of the pipe
+
+            char **command_args = (char **)calloc(100, sizeof(char *));
+            for (int i = 0; i < 100; i++)
+            {
+                command_args[i] = (char *)calloc(100, sizeof(char));
+            }
+
+            int j = 0;
+
+            char *token2 = strtok(command[i], " \t\n");
+
+            while (token2 != NULL)
+            {
+                strcpy(command_args[j], token2);
+                command_args[j++][strlen(token2)] = '\0';
+                token2 = strtok(NULL, " \t\n");
+            }
+
+            // command_pipe[j][0] = '\0';
+            command_args[j] = NULL;
+
+            // printf("%s: pop\n",command_pipe[0] );
+            act_execute(command_args, init_dir, old_wd, history, back_proc, isBackgroundProcess);
+            // printf("done\n" );
+            // free_mem(command_pipe, 500);
+            exit(2);
+        }
+        else
+        {
+            // printf("::%d\n",i );
+            wait(NULL);
+            close(pipefd[1]);
+            input_fd = pipefd[0];
+        }
+    }
+}
+
+int execute_command(struct parsed_comm parsed_command, char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500])
+{
+    // char args[100][50];
+    // declare args as 2D array using malloc
+    char **args = (char **)calloc(100, sizeof(char *));
+
+    int isBackgroundProcess = parsed_command.isBackgroundProcess;
+
+    for (int c = 0; c < 100; c++)
+    {
+        args[c] = (char *)calloc(50, sizeof(char));
+        // args[c] = NULL;
+    }
+
+    char *token;
+    token = strtok(parsed_command.command, " \t\n");
+    int i = 0;
+    while (token != NULL)
+    {
+        strcpy(args[i], token);
+        token = strtok(NULL, " \t\n");
+        i++;
+    }
+
+    // strcpy(args[i], "\0");        ////////////// important
+
+    args[i] = NULL;
+
+    // check if args has '|' or '<' or '>' or '>>'
+    int pipe_flag = 0;
+    int input_redir_flag = 0;
+    int output_redir_flag = 0;
+    int append_redir_flag = 0;
+
+    for (int j = 0; j < i; j++)
+    {
+        if (strcmp(args[j], "|") == 0)
+        {
+            pipe_flag = 1;
+            // pipe_index = j;
+        }
+        if (strcmp(args[j], "<") == 0)
+        {
+            input_redir_flag = 1;
+            // input_redir_index = j;
+        }
+        if (strcmp(args[j], ">") == 0)
+        {
+            output_redir_flag = 1;
+            // output_redir_index = j;
+        }
+        if (strcmp(args[j], ">>") == 0)
+        {
+            append_redir_flag = 1;
+            // append_redir_index = j;
+        }
+    }
+
+    if (pipe_flag == 1)
+    {
+        piping(args, init_dir, old_wd, history, back_proc, isBackgroundProcess);
+    }
+    else
+    {
+        int ret_val = act_execute(args, init_dir, old_wd, history, back_proc, isBackgroundProcess);
+        return ret_val;
     }
     // execvp(args[0], args[100][50]);
 }

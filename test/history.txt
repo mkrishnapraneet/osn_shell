@@ -1,21 +1,20 @@
-cd ../test
+discover
 cd test
-cd dis
+cd trest
+discover
+ls
 cd -
-
-
-pinfo 132575
-pinfo 132574
-gedit & sleep 50 &
-history
-gedit & sleep 5 & pwd
-clear
-sleep 4 &
-sleep &
-gedit &
-pinfo 132456
-gedit &
-pinfo
-discover ./dis -f
-ls /home/mkp -al
-ls .. -al
+cd ~
+ls -al
+discover "osn.txt"
+discover -f
+discover -d 
+discover
+ls
+cd ..
+ls -al
+ls
+pwd
+echo this 	 and that
+echo this
+ls
