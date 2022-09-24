@@ -1,0 +1,20 @@
+cat < history.txt
+cd
+cat < history.txt
+cat < history.txt > please.txt
+cat please.txt
+cat < history.txt > please.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+

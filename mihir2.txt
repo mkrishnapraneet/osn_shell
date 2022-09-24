@@ -1,3 +1,6 @@
+cat < history.txt > rep.txt
+cat hmm.txt
+history > hmm.txt
 cat < history.txt
 history
 cat < history.txt
@@ -5,6 +8,3 @@ history
 cat man.txt
 history > man.txt
 history
-cat history.txt
-echo thththth
-echo < history.txt

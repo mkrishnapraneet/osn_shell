@@ -1,0 +1,6 @@
+cat < history | grep txt | grep please > yay.txt
+cat < please.txt
+cat < history.txt > please.txt
+cat < history.txt > please.txt
+cat please.txt
+cat < history.txt > please.txt

@@ -1,0 +1,20 @@
+
+
+
+cat < history | grep txt | grep please > yay.txt
+cat < history.txt
+cat < history.txt
+cat < history.txt | grep cd > ve.txt
+cat history.txt | grep txt | grep please > yay.txt
+cat < history.txt > please.txt
+cat < history.txt > please.txt
+cat < history.txt > please.txt
+cat < please.txt
+cat please.txt
+cat ve.txt
+cat yay.txt
+cd
+clear
+discover dis
+ls -al
+sleep 3 

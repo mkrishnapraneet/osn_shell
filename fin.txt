@@ -1,0 +1,2 @@
+cat < history.txt | grep cat > res.txt | grep mihir2 > fin.txt
+cat < history.txt | grep cat > res.txt | grep mihir2 > fin.txt

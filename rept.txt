@@ -1,0 +1,11 @@
+
+
+sleep 4 
+echo this and that
+ls
+cat mihir2.txt
+history > mihir2.txt
+cat < history.txt > rep.txt
+cat hmm.txt
+history > hmm.txt
+cat < history.txt

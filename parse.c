@@ -63,7 +63,8 @@ struct inp_out redirect(char **args)
     {
         if (strcmp(args[i], "<") == 0)
         {
-            input_fd = open(args[++i], O_RDONLY);
+            input_fd = open(args[i + 1], O_RDONLY);
+            // printf("came here");
             if (input_fd < 0)
             {
                 perror("Error opening input file");
@@ -71,16 +72,19 @@ struct inp_out redirect(char **args)
             }
             io.isInputFile = 1;
             // remove the < and the file name from the args take care of null pointer
-            int j = i + 1;
+            int j = i + 2;
             if (args[j] == NULL)
             {
-                args[i - 1] = NULL;
+                args[i] = NULL;
             }
             else
             {
                 while (args[j] != NULL)
                 {
+                    free(args[j - 2]);
                     args[j - 2] = args[j];
+                    
+                    args[j] = NULL;
                     j++;
                 }
                 args[j - 2] = NULL;
@@ -88,7 +92,7 @@ struct inp_out redirect(char **args)
         }
         else if (strcmp(args[i], ">") == 0)
         {
-            output_fd = open(args[++i], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            output_fd = open(args[i + 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
             if (output_fd < 0)
             {
                 perror("Error opening output file");
@@ -96,16 +100,19 @@ struct inp_out redirect(char **args)
             }
             io.isOutputFile = 1;
             // remove the > and the file name from the args
-            int j = i + 1;
+            int j = i + 2;
             if (args[j] == NULL)
             {
-                args[i - 1] = NULL;
+                args[i] = NULL;
             }
             else
             {
                 while (args[j] != NULL)
                 {
+                    free(args[j - 2]);
                     args[j - 2] = args[j];
+                    
+                    args[j] = NULL;
                     j++;
                 }
                 args[j - 2] = NULL;
@@ -113,7 +120,7 @@ struct inp_out redirect(char **args)
         }
         else if (strcmp(args[i], ">>") == 0)
         {
-            output_fd = open(args[++i], O_WRONLY | O_CREAT | O_APPEND, 0644);
+            output_fd = open(args[i + 1], O_WRONLY | O_CREAT | O_APPEND, 0644);
             if (output_fd < 0)
             {
                 perror("Error opening output file");
@@ -121,23 +128,28 @@ struct inp_out redirect(char **args)
             }
             io.isOutputFile = 1;
             // remove the >> and the file name from the args
-            int j = i + 1;
+            int j = i + 2;
             if (args[j] == NULL)
             {
-                args[i - 1] = NULL;
+                args[i] = NULL;
             }
             else
             {
                 while (args[j] != NULL)
                 {
+                    free(args[j - 2]);
                     args[j - 2] = args[j];
+                    
+                    args[j] = NULL;
                     j++;
                 }
                 args[j - 2] = NULL;
             }
         }
-
-        i++;
+        else
+        {
+            i++;
+        }
     }
     // printf("yes");
     return io;
@@ -368,7 +380,7 @@ int execute_command(struct parsed_comm parsed_command, char init_dir[500], char 
 
     for (int c = 0; c < 100; c++)
     {
-        args[c] = (char *)calloc(50, sizeof(char));
+        args[c] = (char *)calloc(100, sizeof(char));
         // args[c] = NULL;
     }
 

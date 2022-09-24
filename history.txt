@@ -1,20 +1,20 @@
+cat < history.txt | grep discover | grep dis
 cat < history.txt
-history
-cat man.txt
-history > man.txt
-history
-cat history.txt
-echo thththth
-echo < history.txt
-code
-cat < mihir.txt
-ls > mihir.txt
-ls
-cat v.txt
-echo added >> v.txt
-cat v.txt
-cat history.txt | head -7 | tail -5 > v.txt
-cat sample2.txt | head -7 | tail -5
-cat echo.txt
-echo hello > echo.txt
-cat < grepres.txt
+clear
+cat sorted.txt
+sort < history.txt > sorted.txt
+clear
+ls -al
+cat yay.txt
+cat history.txt | grep txt | grep please > yay.txt
+cat < history | grep txt | grep please > yay.txt
+cat ve.txt
+cat < history.txt | grep cd > ve.txt
+discover dis
+sleep 3 
+cat < please.txt
+cat < history.txt > please.txt
+cat < history.txt
+cd
+cat < history.txt
+cat < history.txt > please.txt

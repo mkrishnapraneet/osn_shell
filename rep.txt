@@ -1,3 +1,4 @@
+history
 cat < history.txt
 history
 cat man.txt
@@ -17,4 +18,3 @@ cat history.txt | head -7 | tail -5 > v.txt
 cat sample2.txt | head -7 | tail -5
 cat echo.txt
 echo hello > echo.txt
-cat < grepres.txt
