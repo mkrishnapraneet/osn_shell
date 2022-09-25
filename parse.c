@@ -7,6 +7,8 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
+extern int active_pid;
+extern int bg_counter;
 struct inp_out
 {
     int isInputFile;
@@ -30,12 +32,14 @@ struct background_process
 {
     int pid;
     char name[500];
+    int s_no;
     // int status;
 };
 
 int input_fd = 0;
 int output_fd = 1;
 
+void jobs(char **args, struct background_process back_proc[500]);
 void discover(char **args, char init_dir[500]);
 void pinfo(char **args, char init_dir[500]);
 void ls_proto(char args[100][50]);
@@ -83,7 +87,7 @@ struct inp_out redirect(char **args)
                 {
                     free(args[j - 2]);
                     args[j - 2] = args[j];
-                    
+
                     args[j] = NULL;
                     j++;
                 }
@@ -111,7 +115,7 @@ struct inp_out redirect(char **args)
                 {
                     free(args[j - 2]);
                     args[j - 2] = args[j];
-                    
+
                     args[j] = NULL;
                     j++;
                 }
@@ -139,7 +143,7 @@ struct inp_out redirect(char **args)
                 {
                     free(args[j - 2]);
                     args[j - 2] = args[j];
-                    
+
                     args[j] = NULL;
                     j++;
                 }
@@ -233,11 +237,18 @@ int act_execute(char **args, char init_dir[500], char old_wd[500], char history[
         free_mem(args, 100);
         return 7;
     }
+    else if (strcmp(args[0], "jobs") == 0)
+    {
+        jobs(args, back_proc);
+        free_mem(args, 100);
+        return 8;
+    }
     else
     {
         // printf("Error : Command not found\n");
         pid_t pid;
         pid = fork();
+        // active_pid = pid;
         if (pid == 0)
         {
             int val_ret = execvp(args[0], args);
@@ -253,7 +264,8 @@ int act_execute(char **args, char init_dir[500], char old_wd[500], char history[
             int status;
             if (isBackgroundProcess == 0)
             {
-                int wait_val = waitpid(pid, &status, 0);
+                active_pid = pid;
+                int wait_val = waitpid(pid, &status, WUNTRACED);
                 if (wait_val == -1)
                 {
                     perror("waitpid() error");
@@ -263,6 +275,10 @@ int act_execute(char **args, char init_dir[500], char old_wd[500], char history[
             }
             else
             {
+                // kill(pid, SIGTTIN);
+                // kill(pid, SIGCONT);
+
+                active_pid = -1;
                 printf("Process with PID %d started in the background\n", pid);
                 // iterate to found the first empty slot in the array
                 int i = 0;
@@ -272,6 +288,8 @@ int act_execute(char **args, char init_dir[500], char old_wd[500], char history[
                 }
                 back_proc[i].pid = pid;
                 strcpy(back_proc[i].name, args[0]);
+                back_proc[i].s_no = bg_counter % 500;
+                bg_counter++;
             }
             // waitpid(pid, &status, 0);
             free_mem(args, 100);

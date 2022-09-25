@@ -18,6 +18,8 @@
 #define WHT "\x1B[1;37m"
 #define RESET "\x1B[1;0m"
 
+int active_pid = -1;
+int bg_counter = 0;
 int parent_pid;
 FILE *hist_file;
 // char history[20][500];
@@ -25,6 +27,7 @@ struct background_process
 {
     int pid;
     char name[500];
+    int s_no;
     // int status;
 };
 struct background_process back_proc[500];
@@ -89,6 +92,53 @@ void sigchld_handler(int sign)
     }
 }
 
+void CTRL_C_handler(int sign)
+{
+    // printf("detected ctrc c\n");
+    // if (getpid() == parent_pid)
+    // {
+    //     // printf("tis\n");
+    //     if (active_pid != -1)
+    //     {
+    //         // check if it is a background process
+    //         // int i = 0;
+    //         // while (back_proc[i].pid != active_pid && i < 500)
+    //         // {
+    //         //     i++;
+    //         // }
+    //         // if (i >= 500) // if it is not a background process
+    //         // {
+    //         printf("killing %d", active_pid);
+    //         // kill(active_pid, SIGINT);
+    //         // }
+    //     }
+    //     // signal(SIGINT, CTRL_C);
+    //     // printf
+    // }
+
+    if (getpid() != parent_pid)
+        return;
+
+    if (active_pid != -1)
+    {
+        kill(active_pid, SIGINT);
+    }
+    return;
+    // signal(SIGINT, CTRL_C_handler);
+
+}
+
+void CTRL_Z_handler(int signal)
+{
+    printf("\ndetected ctrl z\n");
+}
+
+void CTRL_C_tester(int sign)
+{
+    signal(SIGINT, SIG_IGN);
+    printf("detected ctrl c\n");
+}
+
 void mainloop(char history[20][500])
 {
     char username[500];
@@ -117,6 +167,7 @@ void mainloop(char history[20][500])
     {
         back_proc[i].pid = -1;
         strcpy(back_proc[i].name, "");
+        back_proc[i].s_no = -1;
     }
 
     getcwd(init_dir, sizeof(init_dir));
@@ -126,6 +177,12 @@ void mainloop(char history[20][500])
         return;
     }
     strcpy(old_wd, init_dir);
+
+    signal(SIGTSTP, CTRL_Z_handler);
+    // signal(SIGINT, CTRL_C_handler);
+    // signal(SIGINT, SIG_IGN);
+    // signal(SIGINT, CTRL_C_tester);
+    // signal(SIGINT, SIG_IGN);
 
     signal(SIGCHLD, sigchld_handler);
 
@@ -141,6 +198,8 @@ void mainloop(char history[20][500])
     // get username from system using getpwuid()
     while (1)
     {
+        // signal(SIGINT, SIG_IGN);
+        // signal(SIGINT, CTRL_C_tester);
         struct passwd *pw = getpwuid(getuid());
         if (pw)
             strcpy(username, pw->pw_name);
@@ -171,6 +230,8 @@ void mainloop(char history[20][500])
             strcpy(print_cwd, "~");
             strcat(print_cwd, temp);
         }
+
+        active_pid = -1;
         // get current time
 
         // if (strcmp(cwd, init_dir) == 0)
@@ -180,12 +241,18 @@ void mainloop(char history[20][500])
         // read input from user using getline()
         char *input;
         size_t size = 0;
-        getline(&input, &size, stdin);
+        int ctrld = 0;
+        ctrld = getline(&input, &size, stdin);
         if (input == NULL)
         {
             perror("getline() error");
             return;
         }
+        if (ctrld == -1)
+        {
+            input = "exit";
+        }
+        
 
         // strcpy(input, input);
         // if (strcmp(input, prev_command) != 0)
@@ -195,9 +262,12 @@ void mainloop(char history[20][500])
         //     fprintf(hist_file, "%s", input);
         //     fflush(hist_file);
         // }
+        signal(SIGINT, CTRL_C_tester);
 
         t1 = time(NULL);
         flag = parse(input, commands, parsed_commands, background, init_dir, old_wd, history, back_proc);
+
+        
 
         // strcpy(prev_command, input);
         // printf("$$%s %s$$", input, prev_command);

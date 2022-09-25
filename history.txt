@@ -1,20 +1,20 @@
-cat < history.txt | grep discover | grep dis
-cat < history.txt
-clear
-cat sorted.txt
-sort < history.txt > sorted.txt
-clear
-ls -al
-cat yay.txt
-cat history.txt | grep txt | grep please > yay.txt
-cat < history | grep txt | grep please > yay.txt
-cat ve.txt
-cat < history.txt | grep cd > ve.txt
-discover dis
-sleep 3 
-cat < please.txt
-cat < history.txt > please.txt
-cat < history.txt
-cd
-cat < history.txt
-cat < history.txt > please.txt
+jobs -r
+jobs -s
+jobs -y
+jobs -s
+jobs -r
+jobs
+sleep 100&
+gedit &
+sleep 100&
+jobs
+sleep 100&
+gedit&
+sleep 100&
+gedit &
+sleep 177&
+gedit&
+sleep 100&
+
+
+\sleep 100&
