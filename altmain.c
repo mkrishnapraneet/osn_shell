@@ -9,7 +9,6 @@
 #include <sys/wait.h>
 #include <ctype.h>
 #include <termios.h>
-#include <dirent.h>
 // #include <parse.c>
 
 #define RED "\x1B[1;31m"
@@ -20,12 +19,6 @@
 #define CYN "\x1B[1;36m"
 #define WHT "\x1B[1;37m"
 #define RESET "\x1B[1;0m"
-
-char init_dir[500];
-char old_wd[500];
-char cwd[500];
-int time_diff = 0;
-char time_diff_str[500] = "";
 
 int active_pid = -1;
 int bg_counter = 0;
@@ -71,154 +64,7 @@ void enableRawMode()
         die("tcsetattr");
 }
 
-// void prompt(char username[500], char hostname[500], char cwd[500], char print_cwd[500], char *replace, char init_dir[500])
-void prompt()
-{
-    char username[500];
-    char hostname[500];
-    // char init_dir[500];
-    // char cwd[500];
-    char print_cwd[500];
-    // char old_wd[500];
-    // char commands[500][500];
-    // char background[500][500];
-    char *replace;
-    struct passwd *pw = getpwuid(getuid());
-    if (pw)
-        strcpy(username, pw->pw_name);
-    else
-        strcpy(username, "unknown");
-
-    // get hostname from system using gethostname()
-    gethostname(hostname, sizeof(hostname));
-    if (hostname == NULL)
-    {
-        perror("gethostname");
-        exit(1);
-    }
-
-    // get current working directory using getcwd()
-    getcwd(cwd, sizeof(cwd));
-    if (cwd == NULL)
-    {
-        perror("getcwd");
-        exit(1);
-    }
-    strcpy(print_cwd, cwd);
-    replace = strstr(print_cwd, init_dir);
-    if (replace != NULL)
-    {
-        char *temp = replace;
-        temp = temp + strlen(init_dir);
-        strcpy(print_cwd, "~");
-        strcat(print_cwd, temp);
-    }
-
-    active_pid = -1;
-    // get current time
-
-    // if (strcmp(cwd, init_dir) == 0)
-    // strcpy(cwd, "~");
-    printf(CYN "<< " RESET RED "%s" RESET "@" BLU "%s" RESET ":" YEL "%s" RESET " || " MAG "%s" RESET CYN " >> " RESET, username, hostname, print_cwd, time_diff_str);
-}
-
-void handle_tab(char *input, int size, char username[500], char hostname[500], char cwd[500], char print_cwd[500], char *replace, char init_dir[500])
-{
-    // parse the input using strtok
-
-    char *token = strtok(input, " ");
-    char *args[100];
-    int i = 0;
-    while (token != NULL)
-    {
-        args[i] = token;
-        i++;
-        token = strtok(NULL, " \n");
-    }
-    args[i] = NULL;
-
-    // autocomplete the last argument
-    char *last_arg = args[i - 1];
-    int last_arg_len = strlen(last_arg);
-
-    // printf("last arg: %s\n", last_arg);
-
-    // check for matching files in the current directory
-    DIR *d;
-    struct dirent *dir;
-    char common_prefix[100];
-    strcpy(common_prefix, last_arg);
-
-    d = opendir(".");
-    if (d)
-    {
-        dir = readdir(d);
-
-        while ((dir = readdir(d)) != NULL)
-        {
-            if (strncmp(last_arg, dir->d_name, last_arg_len) == 0)
-            {
-                if (dir->d_type == DT_DIR)
-                {
-                    printf("%s/    ", dir->d_name);
-                }
-                else
-                {
-                    printf("%s    ", dir->d_name);
-                }
-
-                strcpy(common_prefix, dir->d_name);
-                break;
-            }
-        }
-
-        // if (dir != NULL)
-        // {
-        //     strcpy(common_prefix, dir->d_name);
-        // }
-
-        while ((dir = readdir(d)) != NULL)
-        {
-            if (strncmp(last_arg, dir->d_name, last_arg_len) == 0)
-            {
-                // printf("%s     ", dir->d_name);
-                // check if it is a directory
-                if (dir->d_type == DT_DIR)
-                {
-                    printf("%s/    ", dir->d_name);
-                }
-                else
-                {
-                    printf("%s    ", dir->d_name);
-                }
-
-                // find the common prefix
-                int j = 0;
-                while (common_prefix[j] != '\0' && dir->d_name[j] != '\0')
-                {
-                    if (common_prefix[j] != dir->d_name[j])
-                    {
-                        common_prefix[j] = '\0';
-                        break;
-                    }
-                    j++;
-                }
-            }
-        }
-        closedir(d);
-    }
-    // char ret_str[500];
-    // strcpy(ret_str, last_arg);
-    printf("\n%s\n", common_prefix);
-
-    // prompt(username, hostname, cwd, print_cwd, replace, init_dir);
-    prompt();
-}
-
 int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500]);
-
-void CTRL_C_handler(int sign);
-void CTRL_Z_handler(int sign);
 
 void sigchld_handler(int sign)
 {
@@ -310,41 +156,7 @@ void CTRL_C_handler(int sign)
 
 void CTRL_Z_handler(int signal)
 {
-    // printf("\ndetected ctrl z\n");
-    if (getpid() != parent_pid)
-        return;
-
-    if (active_pid != -1)
-    {
-        kill(active_pid, SIGTSTP);
-        // add it to background processes
-        int i = 0;
-        while (back_proc[i].pid != -1 && i < 500)
-        {
-            i++;
-        }
-        if (i >= 500)
-        {
-            printf("Error: Too many background processes\n");
-            return;
-        }
-        back_proc[i].pid = active_pid;
-        back_proc[i].s_no = bg_counter;
-        bg_counter++;
-        // get the name of the process
-        char buffer[500];
-        sprintf(buffer, "/proc/%d/cmdline", active_pid);
-        FILE *fd = fopen(buffer, "r");
-        if (fd == NULL)
-        {
-            printf("Error: %s\n", strerror(errno));
-            return;
-        }
-        char *pname;
-        long size = 0;
-        getline(&pname, &size, fd);
-        strcpy(back_proc[i].name, pname);
-    }
+    printf("\ndetected ctrl z\n");
 }
 
 void CTRL_C_tester(int sign)
@@ -357,10 +169,10 @@ void mainloop(char history[20][500])
 {
     char username[500];
     char hostname[500];
-    // char init_dir[500];
-    // char cwd[500];
+    char init_dir[500];
+    char cwd[500];
     char print_cwd[500];
-    // char old_wd[500];
+    char old_wd[500];
     char commands[500][500];
     char background[500][500];
     char *replace;
@@ -368,10 +180,10 @@ void mainloop(char history[20][500])
     struct parsed_comm parsed_commands[500];
     time_t t1 = time(NULL);
     time_t t2 = time(NULL);
-    // int time_diff = 0;
-    // char time_diff_str[500] = "";
+    int time_diff = 0;
+    char time_diff_str[500] = "";
 
-    // char prev_command[500] = "";
+    char prev_command[500] = "";
 
     // struct background_process background_processes[500];
     // allocate memory for background processes dynamically
@@ -393,82 +205,82 @@ void mainloop(char history[20][500])
     strcpy(old_wd, init_dir);
 
     signal(SIGTSTP, CTRL_Z_handler);
-    signal(SIGINT, CTRL_C_handler);
+    // signal(SIGINT, CTRL_C_handler);
     // signal(SIGINT, SIG_IGN);
-    // signal(SIGTSTP, SIG_IGN);
     // signal(SIGINT, CTRL_C_tester);
     // signal(SIGINT, SIG_IGN);
 
     signal(SIGCHLD, sigchld_handler);
 
-    char *input = malloc(sizeof(char) * 500);
-    char c;
+    // hist_file = fopen("history.txt", "w");
+
+    // hist_file = fopen("history.txt", "a+");
+    // if (hist_file == NULL)
+    // {
+    //     perror("fopen() error");
+    //     return;
+    // }
 
     // get username from system using getpwuid()
+    char *inp = malloc(sizeof(char) * 100);
+    char c;
     while (1)
     {
         setbuf(stdout, NULL);
         enableRawMode();
         // printf("Prompt>");
-
+        memset(inp, '\0', 100);
+        int pt = 0;
         // signal(SIGINT, SIG_IGN);
         // signal(SIGINT, CTRL_C_tester);
-        /////////////////////////////////////////////////
-        // struct passwd *pw = getpwuid(getuid());
-        // if (pw)
-        //     strcpy(username, pw->pw_name);
-        // else
-        //     strcpy(username, "unknown");
+        struct passwd *pw = getpwuid(getuid());
+        if (pw)
+            strcpy(username, pw->pw_name);
+        else
+            strcpy(username, "unknown");
 
-        // // get hostname from system using gethostname()
-        // gethostname(hostname, sizeof(hostname));
-        // if (hostname == NULL)
-        // {
-        //     perror("gethostname");
-        //     exit(1);
-        // }
+        // get hostname from system using gethostname()
+        gethostname(hostname, sizeof(hostname));
+        if (hostname == NULL)
+        {
+            perror("gethostname");
+            exit(1);
+        }
 
-        // // get current working directory using getcwd()
-        // getcwd(cwd, sizeof(cwd));
-        // if (cwd == NULL)
-        // {
-        //     perror("getcwd");
-        //     exit(1);
-        // }
-        // strcpy(print_cwd, cwd);
-        // replace = strstr(print_cwd, init_dir);
-        // if (replace != NULL)
-        // {
-        //     char *temp = replace;
-        //     temp = temp + strlen(init_dir);
-        //     strcpy(print_cwd, "~");
-        //     strcat(print_cwd, temp);
-        // }
+        // get current working directory using getcwd()
+        getcwd(cwd, sizeof(cwd));
+        if (cwd == NULL)
+        {
+            perror("getcwd");
+            exit(1);
+        }
+        strcpy(print_cwd, cwd);
+        replace = strstr(print_cwd, init_dir);
+        if (replace != NULL)
+        {
+            char *temp = replace;
+            temp = temp + strlen(init_dir);
+            strcpy(print_cwd, "~");
+            strcat(print_cwd, temp);
+        }
 
-        // active_pid = -1;
-        // // get current time
+        active_pid = -1;
+        // get current time
 
-        // // if (strcmp(cwd, init_dir) == 0)
-        // // strcpy(cwd, "~");
-        // printf(CYN "<< " RESET RED "%s" RESET "@" BLU "%s" RESET ":" YEL "%s" RESET " || " MAG "%s" RESET CYN " >> " RESET, username, hostname, print_cwd, time_diff_str);
-        ////////////////////////////////////////////////////////////
-        // prompt(username, hostname, cwd, print_cwd, replace, init_dir);
-        prompt();
-        memset(input, '\0', 500);
-        int pt = 0;
+        // if (strcmp(cwd, init_dir) == 0)
+        // strcpy(cwd, "~");
+        printf(CYN "<< " RESET RED "%s" RESET "@" BLU "%s" RESET ":" YEL "%s" RESET " || " MAG "%s" RESET CYN " >> " RESET, username, hostname, print_cwd, time_diff_str);
+
         // read input from user using getline()
-        // char *input = malloc(500 * sizeof(char));
-        // int bufsize = 500;
-        // size_t size = 0;
-        // int ctrld = 0;
-        // // ctrld = getline(&input, &size, stdin);
-        // // read characters one by one and stop if newline or tab or EOF is encountered
+        char *input = malloc(500 * sizeof(char));
+        int bufsize = 500;
+        size_t size = 0;
+        int ctrld = 0;
+
         // char c;
         // int i = 0;
-        // // while ((c = getchar()) != '\n')
-        // while (1)
+        // while ((c = getchar()) != '\n')
         // {
-        //     c = getchar();
         //     if (c == EOF)
         //     {
         //         ctrld = -1;
@@ -479,10 +291,6 @@ void mainloop(char history[20][500])
         //         printf("tab detected");
         //         // ctrld = -1;
         //         // continue;
-        //         break;
-        //     }
-        //     if (c == '\n')
-        //     {
         //         break;
         //     }
         //     input[i] = c;
@@ -509,6 +317,9 @@ void mainloop(char history[20][500])
         // {
         //     input = "exit";
         // }
+
+        
+
         while (read(STDIN_FILENO, &c, 1) == 1)
         {
             if (iscntrl(c))
@@ -521,38 +332,34 @@ void mainloop(char history[20][500])
                     buf[2] = 0;
                     if (read(STDIN_FILENO, buf, 2) == 2)
                     { // length of escape code
-                      // printf("\rarrow key: %s", buf);
+                        // printf("\rarrow key: %s", buf);
                     }
                 }
                 else if (c == 127)
                 { // backspace
                     if (pt > 0)
                     {
-                        if (input[pt - 1] == 9)
+                        if (inp[pt - 1] == 9)
                         {
                             for (int i = 0; i < 7; i++)
                             {
                                 printf("\b");
                             }
                         }
-                        input[--pt] = '\0';
+                        inp[--pt] = '\0';
                         printf("\b \b");
                     }
                 }
                 else if (c == 9)
                 { // TAB character
-                    // input[pt++] = c;
-                    // for (int i = 0; i < 8; i++)
-                    // { // TABS should be 8 spaces
-                    //     printf(" ");
-                    // }
-                    // exit(0);
-                    printf("\n");
-                    handle_tab(input, pt, username, hostname, cwd, print_cwd, replace, init_dir);
-                    break;
+                    inp[pt++] = c;
+                    for (int i = 0; i < 8; i++)
+                    { // TABS should be 8 spaces
+                        printf(" ");
+                    }
                 }
                 else if (c == 4)
-                { // CTRL+D
+                {
                     exit(0);
                 }
                 else
@@ -562,22 +369,16 @@ void mainloop(char history[20][500])
             }
             else
             {
-                input[pt++] = c;
+                inp[pt++] = c;
                 printf("%c", c);
             }
         }
         disableRawMode();
-        printf("\n");
 
-        // signal(SIGINT, CTRL_C_handler);
-        // signal(SIGINT, SIG_IGN);
-        // signal(SIGTSTP, SIG_IGN);
-        strcat(input, "\0");
+        signal(SIGINT, CTRL_C_tester);
+
         t1 = time(NULL);
         flag = parse(input, commands, parsed_commands, background, init_dir, old_wd, history, back_proc);
-
-        // strcpy(prev_command, input);
-        // printf("$$%s %s$$", input, prev_command);
 
         if (flag == 1)
         {

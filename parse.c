@@ -9,6 +9,8 @@
 
 extern int active_pid;
 extern int bg_counter;
+extern int parent_pid;
+
 struct inp_out
 {
     int isInputFile;
@@ -36,6 +38,8 @@ struct background_process
     // int status;
 };
 
+extern struct background_process back_proc[500];
+
 int input_fd = 0;
 int output_fd = 1;
 
@@ -47,6 +51,83 @@ void ls(char **args, char init_dir[500]);
 void cd(char **args, char init_dir[500], char old_wd[500]);
 void echo(char **args);
 void pwd();
+
+void CTRL_C_handler(int sign);
+void CTRL_Z_handler(int sign);
+
+// void CTRL_C_handler(int sign)
+// {
+//     // printf("detected ctrc c\n");
+//     // if (getpid() == parent_pid)
+//     // {
+//     //     // printf("tis\n");
+//     //     if (active_pid != -1)
+//     //     {
+//     //         // check if it is a background process
+//     //         // int i = 0;
+//     //         // while (back_proc[i].pid != active_pid && i < 500)
+//     //         // {
+//     //         //     i++;
+//     //         // }
+//     //         // if (i >= 500) // if it is not a background process
+//     //         // {
+//     //         printf("killing %d", active_pid);
+//     //         // kill(active_pid, SIGINT);
+//     //         // }
+//     //     }
+//     //     // signal(SIGINT, CTRL_C);
+//     //     // printf
+//     // }
+
+//     if (getpid() != parent_pid)
+//         return;
+
+//     if (active_pid != -1)
+//     {
+//         kill(active_pid, SIGINT);
+//     }
+//     return;
+//     // signal(SIGINT, CTRL_C_handler);
+// }
+
+// void CTRL_Z_handler(int signal)
+// {
+//     // printf("\ndetected ctrl z\n");
+//     if (getpid() != parent_pid)
+//         return;
+
+//     if (active_pid != -1)
+//     {
+//         kill(active_pid, SIGTSTP);
+//         // add it to background processes
+//         int i = 0;
+//         while (back_proc[i].pid != -1 && i < 500)
+//         {
+//             i++;
+//         }
+//         if (i >= 500)
+//         {
+//             printf("Error: Too many background processes\n");
+//             return;
+//         }
+//         back_proc[i].pid = active_pid;
+//         back_proc[i].s_no = bg_counter;
+//         bg_counter++;
+//         // get the name of the process
+//         char buffer[500];
+//         sprintf(buffer, "/proc/%d/cmdline", active_pid);
+//         FILE *fd = fopen(buffer, "r");
+//         if (fd == NULL)
+//         {
+//             printf("Error: %s\n", strerror(errno));
+//             return;
+//         }
+//         char *pname;
+//         long size = 0;
+//         getline(&pname, &size, fd);
+//         strcpy(back_proc[i].name, pname);
+//     }
+// }
 
 void free_mem(char **args, int size)
 {
@@ -252,16 +333,22 @@ int act_execute(char **args, char init_dir[500], char old_wd[500], char history[
         if (pid == 0)
         {
             int val_ret = execvp(args[0], args);
+
             if (val_ret == -1)
             {
                 perror("execvp() error");
                 free_mem(args, 100);
                 return -1;
             }
+
+            // signal(SIGINT, CTRL_C_handler);
+            // signal(SIGTSTP, CTRL_Z_handler);
         }
         else if (pid > 0)
         {
             int status;
+            // signal(SIGINT, SIG_IGN);
+            // signal(SIGTSTP, SIG_IGN);
             if (isBackgroundProcess == 0)
             {
                 active_pid = pid;

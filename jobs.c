@@ -76,7 +76,8 @@ void jobs(char **args, struct background_process back_proc[500])
         if (fd1 == NULL)
         {
             printf("Error: cannot get information about process with pid %d\n", pid);
-            return;
+            // return;
+            continue;
         }
 
         // get state of the process from /proc/<pid>/stat
