@@ -20,6 +20,8 @@ struct parsed_comm
     int isBackgroundProcess;
 };
 
+// extern struct background_process back_proc[500];
+
 void jobs(char **args, struct background_process back_proc[500])
 {
     int alphabetic_indices[500];
@@ -131,4 +133,108 @@ void jobs(char **args, struct background_process back_proc[500])
     // {
     //     printf("[%d] %s [%d] \n", back_proc[alphabetic_indices[i]].s_no, back_proc[alphabetic_indices[i]].name, back_proc[alphabetic_indices[i]].pid);
     // }
+}
+
+
+void sig(char** args, struct background_process back_proc[500])
+{
+    int proc_s_no = atoi(args[1]);
+    int sign = atoi(args[2]);
+
+    // find proc whose index is s_no and send signal sig to it
+    int i;
+    for (i = 0; i < 500; i++)
+    {
+        if (back_proc[i].s_no == proc_s_no)
+        {
+            break;
+        }
+    }
+    if (i == 500)
+    {
+        printf("Error: No such process\n");
+        return;
+    }
+    int pid = back_proc[i].pid;
+    if (kill(pid, sign) == -1)
+    {
+        printf("Error: Cannot send signal %d to process with pid %d\n", sign, pid);
+    }
+}
+
+void bg(char ** args, struct background_process back_proc[500])
+{
+    int proc_s_no = atoi(args[1]);
+
+    // find proc whose index is s_no and send signal sig to it
+    int i;
+    for (i = 0; i < 500; i++)
+    {
+        if (back_proc[i].s_no == proc_s_no)
+        {
+            break;
+        }
+    }
+    if (i == 500)
+    {
+        printf("Error: No such process\n");
+        return;
+    }
+    int pid = back_proc[i].pid;
+    int v = kill(pid, SIGTTIN);
+    if (v == -1)
+    {
+        printf("Error: Cannot send signal SIGTTIN to process with pid %d\n", pid);
+        return;
+    }
+    int check_val = kill(pid, SIGCONT);
+    if (check_val == -1)
+    {
+        printf("Error: Cannot send signal %d to process with pid %d\n", SIGCONT, pid);
+    }
+}
+
+void fg(char ** args, struct background_process back_proc[500])
+{
+    int proc_s_no = atoi(args[1]);
+
+    // find proc whose index is s_no and send signal sig to it
+    int i;
+    for (i = 0; i < 500; i++)
+    {
+        if (back_proc[i].s_no == proc_s_no)
+        {
+            break;
+        }
+    }
+    if (i == 500)
+    {
+        printf("Error: No such process\n");
+        return;
+    }
+    int pid = back_proc[i].pid;
+    int v = kill(pid, SIGTTIN);
+    if (v == -1)
+    {
+        printf("Error: Cannot send signal SIGTTIN to process with pid %d\n", pid);
+        return;
+    }
+    int check_val = kill(pid, SIGCONT);
+    if (check_val == -1)
+    {
+        printf("Error: Cannot send signal %d to process with pid %d\n", SIGCONT, pid);
+    }
+    // remove from background process list
+    back_proc[i].s_no = -1;
+    back_proc[i].pid = -1;
+    int status;
+    waitpid(pid, &status, WUNTRACED);
+    if (WIFSTOPPED(status))
+    {
+        printf("Process with pid %d stopped\n", pid);
+        back_proc[i].s_no = proc_s_no;
+        back_proc[i].pid = pid;
+        strcpy(back_proc[i].name, args[0]);
+        
+    }
 }

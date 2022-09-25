@@ -9,6 +9,9 @@ make
 2 )
 ./shell
 
+3 )
+'exit' or 'quit' to exit the shell
+Ctrl + D can also be used to exit the shell
 
 
 Assumptions : 
@@ -19,7 +22,5 @@ Assumptions :
 5. The output in 'discover' is not alphabetically sorted.
 6. The directory from where the shell is launched will be set as the home (~) directory for the shell.
 7. The paths should not contain any spaces.
-
-*******************NOTE***********************
-
-For Mid submission of Assignment 3, I have implemented PIPELINING
+8. Shell does not handle multiple inputs and outputs in the same command, but it can handle a single input and single output in the same command. (as was the requirement)
+9. When a background process ends, a message is displayed. The cursor is moved to the next line, and the prompt is displayed.

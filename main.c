@@ -122,8 +122,39 @@ void prompt()
     printf(CYN "<< " RESET RED "%s" RESET "@" BLU "%s" RESET ":" YEL "%s" RESET " || " MAG "%s" RESET CYN " >> " RESET, username, hostname, print_cwd, time_diff_str);
 }
 
-void handle_tab(char *input, int size, char username[500], char hostname[500], char cwd[500], char print_cwd[500], char *replace, char init_dir[500])
+void handle_tab(char *input, int size)
 {
+    if (size == 0)
+    {
+        // prompt();
+        // strcpy(input, "");
+        // return;
+        // list all files in current directory
+        DIR *d;
+        struct dirent *dir;
+        d = opendir(".");
+        if (d)
+        {
+            while ((dir = readdir(d)) != NULL)
+            {
+                // printf("%s  ", dir->d_name);
+                if (dir->d_type == DT_DIR)
+                {
+                    printf("%s/    \n", dir->d_name);
+                }
+                else
+                {
+                    printf("%s    \n", dir->d_name);
+                }
+            }
+            closedir(d);
+        }
+        printf("\n");
+        prompt();
+        strcpy(input, "");
+        return;
+    }
+
     // parse the input using strtok
 
     char *token = strtok(input, " ");
@@ -140,6 +171,7 @@ void handle_tab(char *input, int size, char username[500], char hostname[500], c
     // autocomplete the last argument
     char *last_arg = args[i - 1];
     int last_arg_len = strlen(last_arg);
+    int num_args = i;
 
     // printf("last arg: %s\n", last_arg);
 
@@ -160,14 +192,17 @@ void handle_tab(char *input, int size, char username[500], char hostname[500], c
             {
                 if (dir->d_type == DT_DIR)
                 {
-                    printf("%s/    ", dir->d_name);
+                    printf("%s/    \n", dir->d_name);
                 }
                 else
                 {
-                    printf("%s    ", dir->d_name);
+                    printf("%s    \n", dir->d_name);
                 }
-
-                strcpy(common_prefix, dir->d_name);
+                char appended[500];
+                strcpy(appended, dir->d_name);
+                if (dir->d_type == DT_DIR)
+                    strcat(appended, "/");
+                strcpy(common_prefix, appended);
                 break;
             }
         }
@@ -185,11 +220,11 @@ void handle_tab(char *input, int size, char username[500], char hostname[500], c
                 // check if it is a directory
                 if (dir->d_type == DT_DIR)
                 {
-                    printf("%s/    ", dir->d_name);
+                    printf("%s/    \n", dir->d_name);
                 }
                 else
                 {
-                    printf("%s    ", dir->d_name);
+                    printf("%s    \n", dir->d_name);
                 }
 
                 // find the common prefix
@@ -207,12 +242,31 @@ void handle_tab(char *input, int size, char username[500], char hostname[500], c
         }
         closedir(d);
     }
+    printf("\n");
     // char ret_str[500];
     // strcpy(ret_str, last_arg);
-    printf("\n%s\n", common_prefix);
+    // printf("\n%s\n", common_prefix);
 
     // prompt(username, hostname, cwd, print_cwd, replace, init_dir);
     prompt();
+    // print till the last argument
+    // char *buffer = calloc(500);
+
+    char buffer[500] = "";
+
+    for (int j = 0; j < num_args - 1; j++)
+    {
+        // printf("%s ", args[j]);
+        strcat(buffer, args[j]);
+        strcat(buffer, " ");
+    }
+    // printf("%s", common_prefix);
+    strcat(buffer, common_prefix);
+    strcpy(input, buffer);
+    // printf("%s", input);
+    return;
+
+    // printf("%s", buffer);
 }
 
 int parse(char *str, char commands[500][500], struct parsed_comm parsed_commands[500], char background[500][500], char init_dir[500], char old_wd[500], char history[20][500], struct background_process back_proc[500]);
@@ -256,6 +310,8 @@ void sigchld_handler(int sign)
             // printf("\n%s with PID %d exited normally with status %d\n", pname, pid, WEXITSTATUS(status));
             printf("\n%s with PID %d exited normally with status %d\n", back_proc[i].name, pid, WEXITSTATUS(status));
             back_proc[i].pid = -1;
+            back_proc[i].s_no = -1;
+            prompt();
         }
         else if (WIFSIGNALED(status))
         {
@@ -413,102 +469,12 @@ void mainloop(char history[20][500])
 
         // signal(SIGINT, SIG_IGN);
         // signal(SIGINT, CTRL_C_tester);
-        /////////////////////////////////////////////////
-        // struct passwd *pw = getpwuid(getuid());
-        // if (pw)
-        //     strcpy(username, pw->pw_name);
-        // else
-        //     strcpy(username, "unknown");
 
-        // // get hostname from system using gethostname()
-        // gethostname(hostname, sizeof(hostname));
-        // if (hostname == NULL)
-        // {
-        //     perror("gethostname");
-        //     exit(1);
-        // }
-
-        // // get current working directory using getcwd()
-        // getcwd(cwd, sizeof(cwd));
-        // if (cwd == NULL)
-        // {
-        //     perror("getcwd");
-        //     exit(1);
-        // }
-        // strcpy(print_cwd, cwd);
-        // replace = strstr(print_cwd, init_dir);
-        // if (replace != NULL)
-        // {
-        //     char *temp = replace;
-        //     temp = temp + strlen(init_dir);
-        //     strcpy(print_cwd, "~");
-        //     strcat(print_cwd, temp);
-        // }
-
-        // active_pid = -1;
-        // // get current time
-
-        // // if (strcmp(cwd, init_dir) == 0)
-        // // strcpy(cwd, "~");
-        // printf(CYN "<< " RESET RED "%s" RESET "@" BLU "%s" RESET ":" YEL "%s" RESET " || " MAG "%s" RESET CYN " >> " RESET, username, hostname, print_cwd, time_diff_str);
-        ////////////////////////////////////////////////////////////
         // prompt(username, hostname, cwd, print_cwd, replace, init_dir);
         prompt();
         memset(input, '\0', 500);
         int pt = 0;
-        // read input from user using getline()
-        // char *input = malloc(500 * sizeof(char));
-        // int bufsize = 500;
-        // size_t size = 0;
-        // int ctrld = 0;
-        // // ctrld = getline(&input, &size, stdin);
-        // // read characters one by one and stop if newline or tab or EOF is encountered
-        // char c;
-        // int i = 0;
-        // // while ((c = getchar()) != '\n')
-        // while (1)
-        // {
-        //     c = getchar();
-        //     if (c == EOF)
-        //     {
-        //         ctrld = -1;
-        //         break;
-        //     }
-        //     if (c == '\t')
-        //     {
-        //         printf("tab detected");
-        //         // ctrld = -1;
-        //         // continue;
-        //         break;
-        //     }
-        //     if (c == '\n')
-        //     {
-        //         break;
-        //     }
-        //     input[i] = c;
-        //     i++;
 
-        //     if (i >= bufsize)
-        //     {
-        //         bufsize += 500;
-        //         input = realloc(input, bufsize * sizeof(char));
-        //         if (input == NULL)
-        //         {
-        //             perror("realloc() error");
-        //             exit(1);
-        //         }
-        //     }
-        // }
-        // input[i] = '\0';
-        // if (input == NULL)
-        // {
-        //     perror("getline() error");
-        //     return;
-        // }
-        // if (ctrld == -1)
-        // {
-        //     input = "exit";
-        // }
         while (read(STDIN_FILENO, &c, 1) == 1)
         {
             if (iscntrl(c))
@@ -548,8 +514,10 @@ void mainloop(char history[20][500])
                     // }
                     // exit(0);
                     printf("\n");
-                    handle_tab(input, pt, username, hostname, cwd, print_cwd, replace, init_dir);
-                    break;
+                    handle_tab(input, pt);
+                    pt = strlen(input);
+                    printf("%s", input);
+                    // break;
                 }
                 else if (c == 4)
                 { // CTRL+D

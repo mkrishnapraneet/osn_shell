@@ -1,20 +1,20 @@
-mi
-cd
-mi
-cd -
-ls -a
-ls -l
-cd -
-echo this
-ls -al
-cd /home/mkp
-history
-histpory
-sleep 2
-cd -
-cd /home/mkp
-cd
-cd -
-cd ..
-ls
-cd
+jobs
+fg 1
+jobs
+bg 1
+jobs
+sleep 50&
+jobs
+
+fg 0
+jobs
+fg 0
+jobs
+sleep 100&
+pinfo 94182
+jobs
+fg 2
+jobs
+sleep 69&
+bg 1
+jobs

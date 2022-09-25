@@ -1,0 +1,20 @@
+ls
+cd free
+ls free
+ls mihir2.txt
+ls 
+ls
+
+ls mihir
+ls mi.txt
+
+ls
+sleep 10
+
+firefox
+ls
+
+ls mihir
+ls
+..
+

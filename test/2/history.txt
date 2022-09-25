@@ -1,3 +1,11 @@
+
+jobs
+fg 0
+jobs
+gedit
+clear
+ls
+cd 2/
 cd test
 sleep 5&
 sleep 3
@@ -10,11 +18,3 @@ sleep 10& sleep 12&
 ls
 sleep 5&
 
-cat history.txt &
-vim &
-vim
-free/ 
-jobs
-fg 2
-jobs
-sig 3 1

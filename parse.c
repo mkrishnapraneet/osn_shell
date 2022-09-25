@@ -43,6 +43,9 @@ extern struct background_process back_proc[500];
 int input_fd = 0;
 int output_fd = 1;
 
+void fg(char **args, struct background_process back_proc[500]);
+void bg(char **args, struct background_process back_proc[500]);
+void sig(char **args, struct background_process back_proc[500]);
 void jobs(char **args, struct background_process back_proc[500]);
 void discover(char **args, char init_dir[500]);
 void pinfo(char **args, char init_dir[500]);
@@ -323,6 +326,24 @@ int act_execute(char **args, char init_dir[500], char old_wd[500], char history[
         jobs(args, back_proc);
         free_mem(args, 100);
         return 8;
+    }
+    else if (strcmp(args[0], "sig") == 0)
+    {
+        sig(args, back_proc);
+        free_mem(args, 100);
+        return 10;
+    }
+    else if (strcmp(args[0], "bg") == 0)
+    {
+        bg(args, back_proc);
+        free_mem(args, 100);
+        return 11;
+    }
+    else if (strcmp(args[0], "fg") == 0)
+    {
+        fg(args, back_proc);
+        free_mem(args, 100);
+        return 12;
     }
     else
     {
