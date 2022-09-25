@@ -24,3 +24,6 @@ Assumptions :
 7. The paths should not contain any spaces.
 8. Shell does not handle multiple inputs and outputs in the same command, but it can handle a single input and single output in the same command. (as was the requirement)
 9. When a background process ends, a message is displayed. The cursor is moved to the next line, and the prompt is displayed.
+10. main.c is the driver file for the shell.
+11. parse.c contains the code for parsing the input command and sending it for execution.
+12. All other files contain the code for the various commands that the shell supports. Their names are self-explanatory.
