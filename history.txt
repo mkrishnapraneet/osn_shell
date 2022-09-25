@@ -1,20 +1,20 @@
+fg 4
+bg 4
 jobs
-fg 1
+gedit
+clear
+fg 3
 jobs
-bg 1
+firefox
 jobs
-sleep 50&
+cat check.txt
+cat < history.txt | grep e | head -2 > check.txt
+cat check.txt
+cat < history.txt | grep e > check.txt
 jobs
-
-fg 0
+sig 1 9
+cd -
 jobs
-fg 0
-jobs
-sleep 100&
-pinfo 94182
-jobs
-fg 2
-jobs
-sleep 69&
-bg 1
-jobs
+echo here
+echo
+echo this

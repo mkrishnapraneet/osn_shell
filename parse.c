@@ -353,14 +353,23 @@ int act_execute(char **args, char init_dir[500], char old_wd[500], char history[
         // active_pid = pid;
         if (pid == 0)
         {
+            // if (isBackgroundProcess == 0)
+            // {
+                setpgid(0,0);
+                signal(SIGINT, SIG_DFL);
+                signal(SIGTSTP, SIG_DFL);
+            // }
+
             int val_ret = execvp(args[0], args);
 
             if (val_ret == -1)
             {
                 perror("execvp() error");
                 free_mem(args, 100);
-                return -1;
+                // return -1;
+                exit(1);
             }
+            exit(val_ret);
 
             // signal(SIGINT, CTRL_C_handler);
             // signal(SIGTSTP, CTRL_Z_handler);
@@ -368,18 +377,38 @@ int act_execute(char **args, char init_dir[500], char old_wd[500], char history[
         else if (pid > 0)
         {
             int status;
-            // signal(SIGINT, SIG_IGN);
-            // signal(SIGTSTP, SIG_IGN);
+
             if (isBackgroundProcess == 0)
             {
+                pid_t pgrp = tcgetpgrp(STDIN_FILENO);
+                signal(SIGTTOU, SIG_IGN);
+                signal(SIGTTIN, SIG_IGN);
+                tcsetpgrp(STDIN_FILENO, pid);
                 active_pid = pid;
                 int wait_val = waitpid(pid, &status, WUNTRACED);
+                tcsetpgrp(STDIN_FILENO, pgrp);
                 if (wait_val == -1)
                 {
                     perror("waitpid() error");
                     free_mem(args, 100);
                     return -1;
                 }
+                if (WIFSTOPPED(status))
+                {
+                    // fprintf(stderr,"yes\n");
+                    // add to background process
+                    int i = 0;
+                    while (back_proc[i].pid != -1)
+                    {
+                        i++;
+                    }
+                    back_proc[i].pid = pid;
+                    strcpy(back_proc[i].name, args[0]);
+                    back_proc[i].s_no = bg_counter % 500;
+                    bg_counter++;
+                }
+                signal(SIGTTIN, SIG_DFL);
+                signal(SIGTTOU, SIG_DFL);
             }
             else
             {

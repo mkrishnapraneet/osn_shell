@@ -448,10 +448,10 @@ void mainloop(char history[20][500])
     }
     strcpy(old_wd, init_dir);
 
-    signal(SIGTSTP, CTRL_Z_handler);
-    signal(SIGINT, CTRL_C_handler);
-    // signal(SIGINT, SIG_IGN);
-    // signal(SIGTSTP, SIG_IGN);
+    // signal(SIGTSTP, CTRL_Z_handler);
+    // signal(SIGINT, CTRL_C_handler);
+    signal(SIGINT, SIG_IGN);
+    signal(SIGTSTP, SIG_IGN);
     // signal(SIGINT, CTRL_C_tester);
     // signal(SIGINT, SIG_IGN);
 

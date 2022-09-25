@@ -6,6 +6,10 @@
 #include <signal.h>
 #include <sys/wait.h>
 
+extern int active_pid;
+extern int bg_counter;
+extern int parent_pid;
+
 struct background_process
 {
     int pid;
@@ -135,8 +139,7 @@ void jobs(char **args, struct background_process back_proc[500])
     // }
 }
 
-
-void sig(char** args, struct background_process back_proc[500])
+void sig(char **args, struct background_process back_proc[500])
 {
     int proc_s_no = atoi(args[1]);
     int sign = atoi(args[2]);
@@ -162,7 +165,7 @@ void sig(char** args, struct background_process back_proc[500])
     }
 }
 
-void bg(char ** args, struct background_process back_proc[500])
+void bg(char **args, struct background_process back_proc[500])
 {
     int proc_s_no = atoi(args[1]);
 
@@ -194,7 +197,7 @@ void bg(char ** args, struct background_process back_proc[500])
     }
 }
 
-void fg(char ** args, struct background_process back_proc[500])
+void fg(char **args, struct background_process back_proc[500])
 {
     int proc_s_no = atoi(args[1]);
 
@@ -228,13 +231,43 @@ void fg(char ** args, struct background_process back_proc[500])
     back_proc[i].s_no = -1;
     back_proc[i].pid = -1;
     int status;
-    waitpid(pid, &status, WUNTRACED);
+
+    // waitpid(pid, &status, WUNTRACED);
+    // if (WIFSTOPPED(status))
+    // {
+    //     printf("Process with pid %d stopped\n", pid);
+    //     back_proc[i].s_no = proc_s_no;
+    //     back_proc[i].pid = pid;
+    //     strcpy(back_proc[i].name, args[0]);
+
+    // }
+    pid_t pgrp = tcgetpgrp(STDIN_FILENO);
+    signal(SIGTTOU, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
+    tcsetpgrp(STDIN_FILENO, pid);
+    active_pid = pid;
+    int wait_val = waitpid(pid, &status, WUNTRACED);
+    tcsetpgrp(STDIN_FILENO, pgrp);
+    if (wait_val == -1)
+    {
+        perror("waitpid() error");
+        // free_mem(args, 100);
+        return ;
+    }
     if (WIFSTOPPED(status))
     {
-        printf("Process with pid %d stopped\n", pid);
-        back_proc[i].s_no = proc_s_no;
+        // fprintf(stderr, "yes\n");
+        // add to background process
+        int i = 0;
+        while (back_proc[i].pid != -1)
+        {
+            i++;
+        }
         back_proc[i].pid = pid;
         strcpy(back_proc[i].name, args[0]);
-        
+        back_proc[i].s_no = bg_counter % 500;
+        bg_counter++;
     }
+    signal(SIGTTIN, SIG_DFL);
+    signal(SIGTTOU, SIG_DFL);
 }
