@@ -1,3 +1,6 @@
+jobs
+gedit
+sleep 100&
 fg 4
 bg 4
 jobs
@@ -15,6 +18,3 @@ jobs
 sig 1 9
 cd -
 jobs
-echo here
-echo
-echo this
